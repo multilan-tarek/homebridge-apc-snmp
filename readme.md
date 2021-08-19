@@ -1,12 +1,12 @@
-#homebridge-apc-snmp
-###Version 1.0.0
-###APC UPS SNMP plugin for homebridge
+# homebridge-apc-snmp
+### Version 1.0.0
+### APC UPS SNMP plugin for homebridge
 
 #### **This is an early version! If you have any problems, feel free to open an issue.**
 #### Tested with an APC SmartUPS 750 RM (SUA750RMI2U) with the AP9606 Web/SNMP Card
 
 
-##How to get started
+## How to get started
 1. Install "homebridge-apc-snmp" using the web ui or "npm install homebridge-apc-snmp"
 2. Create a new accessory config
 3. Set the *accessory* setting to *ups*
@@ -25,7 +25,7 @@
 10. Hope for the best
 11. Check the log for any errors, timeouts are okay (sometimes). If you have problems, open an issue.
 
-##Config settings
+## Config settings
 ```json
 {
   "accessory": "ups",                   Must be this value
