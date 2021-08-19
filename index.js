@@ -30,8 +30,11 @@ class UPS {
             "bat_capacity": "1.3.6.1.4.1.318.1.1.1.2.2.1.0",
             "bat_status": "1.3.6.1.4.1.318.1.1.1.2.1.1.0",
             "time_on_bat": "1.3.6.1.4.1.318.1.1.1.2.1.2.0",
+            "alarm_state": "1.3.6.1.4.1.318.1.1.1.5.2.4.0",
             "turn_on": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.6.0", "type": snmp.ObjectType.INTEGER, "value": 2},
-            "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 2}
+            "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 2},
+            "alarm_on": {"oid": "1.3.6.1.4.1.318.1.1.1.5.2.4.0", "type": snmp.ObjectType.INTEGER, "value": 1},
+            "alarm_off": {"oid": "1.3.6.1.4.1.318.1.1.1.5.2.4.0", "type": snmp.ObjectType.INTEGER, "value": 3}
         };
 
         this.Service = this.api.hap.Service;
@@ -84,10 +87,10 @@ class UPS {
             .onGet(this.getPowerStateHandler.bind(this))
             .onSet(this.setPowerStateHandler.bind(this));
 
-        this.switchService2 = new this.Service.Switch(this.name, "2");
-        this.switchService2.getCharacteristic(this.Characteristic.On)
-            .onGet(this.getPowerStateHandler.bind(this))
-            .onSet(this.setPowerStateHandler.bind(this));
+        this.alarmSwitchService = new this.Service.Switch(this.name + " Alarm");
+        this.alarmSwitchService.getCharacteristic(this.Characteristic.On)
+            .onGet(this.getAlarmStateHandler.bind(this))
+            .onSet(this.setAlarmStateHandler.bind(this));
     }
 
     setSnmp(oid, type, value) {
@@ -130,6 +133,32 @@ class UPS {
             this.setSnmp(this.oids.turn_on.oid, this.oids.turn_on.type, this.oids.turn_on.value);
         } else {
             this.setSnmp(this.oids.turn_off.oid, this.oids.turn_off.type, this.oids.turn_off.value);
+        }
+    }
+
+    async getAlarmStateHandler() {
+        this.log.debug('Triggered GET getAlarmStateHandler');
+        var that = this
+        this.session.get([this.oids.alarm_state], function (error, varbinds) {
+            if (error) {
+                that.log.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    that.log.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    that.alarm_state = varbinds[0].value.toString();
+                }
+            }
+        });
+        return this.alarm_state <= 2;
+    }
+
+    async setAlarmStateHandler(value) {
+        this.log.debug('Triggered SET setAlarmStateHandler');
+        if (value === true) {
+            this.setSnmp(this.oids.alarm_on.oid, this.oids.alarm_on.type, this.oids.alarm_on.value);
+        } else {
+            this.setSnmp(this.oids.alarm_off.oid, this.oids.alarm_off.type, this.oids.alarm_off.value);
         }
     }
 
