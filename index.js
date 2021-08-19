@@ -93,7 +93,7 @@ class UPS {
         }
         inherits(PowerService, this.Service)
 
-        this.powerService = new PowerService(this.name)
+        this.powerService = new PowerService()
         this.powerService.getCharacteristic(this.CommunityTypes.InputVoltageAC)
             .onGet(this.getInputVoltageHandler.bind(this))
         //this.powerService
