@@ -50,7 +50,7 @@ class UPS {
     }
 
     getSnmp(oid) {
-        var value
+        let value = ""
         this.session.get([oid], function (error, varbinds) {
             if (error) {
                 console.error(error);
