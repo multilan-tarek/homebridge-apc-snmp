@@ -25,6 +25,7 @@ class UPS {
         this.Characteristic = this.api.hap.Characteristic;
 
         this.model = this.getSnmp(this.oids.model);
+        this.name = this.model
         this.serial_number = this.getSnmp(this.oids.serial_number);
         this.firmware_rev = this.getSnmp(this.oids.firmware_rev);
 
@@ -53,13 +54,13 @@ class UPS {
         this.session.get([oid], function (error, varbinds) {
             if (error) {
                 console.error(error);
-                return "N/A";
             } else {
-                if (snmp.isVarbindError (varbinds[0])) {
-                    console.error (snmp.varbindError (varbinds[0]));
-                    return "N/A";
-                } else {
-                    return varbinds[0].value;
+                for (let i = 0; i < varbinds.length; i++) {
+                    if (snmp.isVarbindError (varbinds[i])) {
+                        console.error (snmp.varbindError (varbinds[i]));
+                    } else {
+                        return varbinds[i].value;
+                    }
                 }
             }
         });
@@ -68,15 +69,13 @@ class UPS {
     setSnmp(oid, type, value) {
         this.session.set ([{oid, type, value}], function (error, varbinds) {
             if (error) {
-                console.error (error.toString ());
+                console.error(error.toString());
             } else {
                 for (let i = 0; i < varbinds.length; i++) {
-                    console.log (varbinds[i].oid + "|" + varbinds[i].value);
-
                     if (snmp.isVarbindError (varbinds[i]))
-                        console.error (snmp.varbindError (varbinds[i]));
+                        console.error(snmp.varbindError (varbinds[i]));
                     else
-                        console.log (varbinds[i].oid + "|" + varbinds[i].value);
+                        console.log(varbinds[i].oid + "|" + varbinds[i].value);
                 }
             }
         });
