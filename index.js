@@ -180,9 +180,13 @@ class UPS {
             }
         });
         if (this.time_on_bat === 0) {
+            console.log(1)
             return 1;
+
         } else {
+            console.log(2)
             return 0;
+
         }
     }
 }
