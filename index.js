@@ -197,9 +197,11 @@ class UPS {
             that.session.get([that.oids.model], function (error, varbinds) {
                 if (error) {
                     console.error(error);
+                    reject(error)
                 } else {
                     if (snmp.isVarbindError(varbinds[0])) {
                         console.error(snmp.varbindError(varbinds[0]));
+                        reject(error)
                     } else {
                         var value = varbinds[0].value.toString()
                         resolve(value)
@@ -216,9 +218,11 @@ class UPS {
             that.session.get([that.oids.serial_number], function (error, varbinds) {
                 if (error) {
                     console.error(error);
+                    reject(error)
                 } else {
                     if (snmp.isVarbindError(varbinds[0])) {
                         console.error(snmp.varbindError(varbinds[0]));
+                        reject(error)
                     } else {
                         var value = varbinds[0].value.toString()
                         resolve(value)
@@ -235,9 +239,11 @@ class UPS {
             that.session.get([that.oids.firmware_rev], function (error, varbinds) {
                 if (error) {
                     console.error(error);
+                    reject(error)
                 } else {
                     if (snmp.isVarbindError(varbinds[0])) {
                         console.error(snmp.varbindError(varbinds[0]));
+                        reject(error)
                     } else {
                         var value = varbinds[0].value.toString()
                         resolve(value)
