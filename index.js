@@ -33,7 +33,7 @@ class UPS {
         this.log("UPS Info:");
         for (const [key, value] of Object.entries(this.oids)) {
             if (key === "model" || key === "serial_number" || key === "firmware_rev") {
-                this.session.get([oid], function (error, varbinds) {
+                this.session.get([value], function (error, varbinds) {
                     if (error) {
                         console.error(error);
                     } else {
