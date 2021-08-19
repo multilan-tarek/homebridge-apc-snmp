@@ -130,8 +130,7 @@ class UPS {
                 }
             }
         });
-        console.log(this.out_volt);
-        return false;
+        return this.out_volt >= 10;
     }
 
     async setOnHandler(value) {
