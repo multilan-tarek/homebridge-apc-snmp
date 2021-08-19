@@ -68,12 +68,10 @@ class UPS {
             });
         });
 
-        promise.then(function(resolve) {
+        return promise.then(function(resolve) {
             console.log(resolve)
             return resolve;
         });
-
-
 
     }
 
