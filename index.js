@@ -24,18 +24,21 @@ class UPS {
         var service = this.api.hap.Service;
         var characteristic = this.api.hap.Characteristic;
 
-        this.informationService = new service.AccessoryInformation()
-            .setCharacteristic(characteristic.Manufacturer, "APC")
 
 
+        this.manufacturer = "APC"
         this.model = this.getSNMP(this.oids.model);
         this.serial_number = this.getSNMP(this.oids.serial_number);
         this.firmware_rev = this.getSNMP(this.oids.firmware_rev);
 
         this.log("UPS Info:");
+        this.log("Manufacturer: "+ this.manufacturer)
         this.log("Model: " + this.model);
         this.log("Serial Number: " + this.serial_number);
         this.log("Firmware Rev.: " + this.firmware_rev);
+
+        this.informationService = new service.AccessoryInformation()
+            .setCharacteristic(characteristic.Manufacturer, this.manufacturer)
 
 
         this.switchService = new this.api.hap.Service.Switch(this.name);
@@ -58,7 +61,7 @@ class UPS {
                 console.error(snmp.varbindError(varbinds[0]));
             } else {
                 console.log(varbinds[0].oid + " = " + varbinds[0].value);
-                this.model = varbinds[0].value;
+                console.log(this.manufacturer)
                 return varbinds[0].value
             }
         }
