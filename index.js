@@ -138,9 +138,9 @@ class UPS {
      */
     getServices() {
         return [
-            this.powerService,
+            this.alarmService,
             this.informationService,
-            //this.batteryService,
+            this.batteryService,
             this.switchService,
 
         ];
