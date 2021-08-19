@@ -60,17 +60,10 @@ class UPS {
                 });
             }
         }
-
-
-
-
-
-        this.switchService = new this.api.hap.Service.Switch(this.name);
-
-        // link methods used when getting or setting the state of the service
-        this.switchService.getCharacteristic(this.api.hap.Characteristic.On)
-            .onGet(this.getOnHandler.bind(this))   // bind to getOnHandler method below
-            .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
+        this.switchService =  new this.Service(this.Service.Switch);
+        this.switchService.getCharacteristic(this.Characteristic.On)
+            .onGet(this.getPowerStateHandler.bind(this))
+            .onSet(this.setPowerStateHandler.bind(this));
     }
 
     getSnmp(oid) {
@@ -117,7 +110,7 @@ class UPS {
         ];
     }
 
-    async getOnHandler() {
+    async getPowerStateHandler() {
         var that = this
         this.session.get([this.oids.out_volt], function (error, varbinds) {
             if (error) {
@@ -133,7 +126,7 @@ class UPS {
         return this.out_volt >= 10;
     }
 
-    async setOnHandler(value) {
+    async setPowerStateHandler(value) {
         if (value === true) {
             this.setSnmp(this.oids.turn_on.oid, this.oids.turn_on.type, this.oids.turn_on.value);
         } else {
