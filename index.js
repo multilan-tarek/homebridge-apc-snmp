@@ -37,10 +37,12 @@ class UPS {
         this.Characteristic = this.api.hap.Characteristic;
         this.name = config.name;
 
-        this.informationService = new this.api.hap.Service.AccessoryInformation()
-            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
+        this.informationService = new this.Service.AccessoryInformation()
+            .setCharacteristic(this.Characteristic.Manufacturer, "APC")
+        this.informationService = new this.Service.AccessoryInformation()
+            .getCharacteristic(this.Characteristic.Model)
+            .onGet(this.updateAccessoryInformation.bind(this))
 
-        var that = this
         for (const [key, value] of Object.entries(this.oids)) {
             if (key === "model" || key === "serial_number" || key === "firmware_rev") {
                 this.session.get([value], function (error, varbinds) {
@@ -51,10 +53,8 @@ class UPS {
                             console.error(snmp.varbindError(varbinds[0]));
                         } else {
                             if (key === "model") {
-                                that.model = varbinds[0].value.toString();
                                 that.log("Model: " + varbinds[0].value.toString());
                                 that.log("Manufacturer: " + "APC")
-                                that.informationService.setCharacteristic(that.api.hap.Characteristic.Model, varbinds[0].value.toString());
                             } else if (key === "serial_number") {
                                 that.log("Serial Number: " + varbinds[0].value.toString());
                             } else if (key === "firmware_rev") {
@@ -64,19 +64,7 @@ class UPS {
                     }
                 });
             }
-            console.log(this.model + "111")
         }
-        console.log(this.model)
-        this.informationService.setCharacteristic(that.api.hap.Characteristic.Model, "smartups");
-
-
-
-
-
-
-        //this.informationService.setCharacteristic(this.Characteristic.Name, this.model);
-        //this.informationService.setCharacteristic(this.Characteristic.SerialNumber, this.serial_number);
-        //this.informationService.setCharacteristic(this.Characteristic.FirmwareRevision, this.firmware_rev);
 
         this.batteryService = new this.Service.BatteryService(this.name)
         this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery)
@@ -105,6 +93,33 @@ class UPS {
                 }
             }
         });
+    }
+
+    async updateAccessoryInformation() {
+        var that = this
+        for (const [key, value] of Object.entries(this.oids)) {
+            if (key === "model" || key === "serial_number" || key === "firmware_rev") {
+                this.session.get([value], function (error, varbinds) {
+                    if (error) {
+                        console.error(error);
+                    } else {
+                        if (snmp.isVarbindError(varbinds[0])) {
+                            console.error(snmp.varbindError(varbinds[0]));
+                        } else {
+                            if (key === "model") {
+                                that.model = varbinds[0].value.toString();
+                                that.informationService.setCharacteristic(that.api.hap.Characteristic.Model, varbinds[0].value.toString());
+                            } else if (key === "serial_number") {
+                                that.informationService.setCharacteristic(that.api.hap.Characteristic.SerialNumber, varbinds[0].value.toString());
+                            } else if (key === "firmware_rev") {
+                                that.informationService.setCharacteristic(that.api.hap.Characteristic.FirmwareRevision, varbinds[0].value.toString());
+                            }
+                        }
+                    }
+                });
+            }
+        }
+        console.log(this.model)
     }
 
     async getPowerStateHandler() {
