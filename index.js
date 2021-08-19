@@ -50,7 +50,7 @@ class UPS {
     }
 
     getSnmp(oid) {
-        this.session.get([oid], function (error, varbinds) {
+        return (this.session.get([oid], function (error, varbinds) {
             if (error) {
                 console.error(error);
             } else {
@@ -58,10 +58,10 @@ class UPS {
                         console.error (snmp.varbindError (varbinds[0]));
                     } else {
                         console.log(varbinds[0].oid + "|" + varbinds[0].value);
-                        return varbinds[0].value.toString();
+                        return varbinds[0].value;
                     }
             }
-        });
+        }));
     }
 
     setSnmp(oid, type, value) {
