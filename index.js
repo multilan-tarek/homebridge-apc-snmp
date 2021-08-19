@@ -244,11 +244,11 @@ class UPS {
                 }
             }
         });
-        return this.bat_capacity
+        return 2
     }
 
     async getPowerVolts() {
-        this.log.debug('Triggered GET getPowerVolts');
+        this.log.info('Triggered GET getPowerVolts');
         //var that = this
         //this.session.get([this.oids.bat_capacity], function (error, varbinds) {
         //    if (error) {
@@ -265,7 +265,7 @@ class UPS {
     }
 
     async getPowerAmps() {
-        this.log.debug('Triggered GET getPowerAmps');
+        this.log.info('Triggered GET getPowerAmps');
         //var that = this
         //this.session.get([this.oids.bat_capacity], function (error, varbinds) {
         //    if (error) {
@@ -282,7 +282,7 @@ class UPS {
     }
 
     async getPowerWatts() {
-        this.log.debug('Triggered GET getPowerWatts');
+        this.log.info('Triggered GET getPowerWatts');
         //var that = this
         //this.session.get([this.oids.bat_capacity], function (error, varbinds) {
         //    if (error) {
