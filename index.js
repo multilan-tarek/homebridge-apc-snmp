@@ -10,7 +10,6 @@ class UPS {
         this.log = log;
         this.config = config;
         this.api = api;
-        this.session = snmp.createSession("10.0.30.3", "private");
         this.oids = {
             "model": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
             "manufacturer": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
@@ -51,7 +50,8 @@ class UPS {
 
     getSNMP(oid) {
         return new Promise(function(resolve, reject) {
-            this.session.get([oid], function (error, varbinds) {
+            let session = snmp.createSession("10.0.30.3", "private");
+            session.get([oid], function (error, varbinds) {
                 if (error) {
                     console.error(error);
                 } else {
@@ -63,6 +63,7 @@ class UPS {
                     }
                 }
             });
+            session.close();
         }).then(function(value) {
             console.log(value)
         })
