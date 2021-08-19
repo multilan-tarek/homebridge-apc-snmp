@@ -43,6 +43,7 @@ class UPS {
             .getCharacteristic(this.Characteristic.Model)
             .onGet(this.updateAccessoryInformation.bind(this))
 
+        var that = this
         for (const [key, value] of Object.entries(this.oids)) {
             if (key === "model" || key === "serial_number" || key === "firmware_rev") {
                 this.session.get([value], function (error, varbinds) {
