@@ -2,10 +2,10 @@ var snmp = require("net-snmp");
 
 
 module.exports = (api) => {
-    api.registerAccessory('apc_snmp_ups', ApcSnmpUps);
+    api.registerAccessory('ups', UPS);
 };
 
-class ApcSnmpUps {
+class UPS {
     constructor(log, config, api) {
         this.log = log;
         this.config = config;
