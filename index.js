@@ -11,7 +11,8 @@ class UPS {
             this.informationService,
             this.batteryService,
             this.switchService,
-            this.alarmSwitchService
+            this.alarmSwitchService,
+            this.service
         ];
     }
 
@@ -90,6 +91,44 @@ class UPS {
         this.alarmSwitchService.getCharacteristic(this.Characteristic.On)
             .onGet(this.getAlarmStateHandler.bind(this))
             .onSet(this.setAlarmStateHandler.bind(this));
+
+        this.service = new this.Service(this.Service.StatefulProgrammableSwitch);
+
+        // create handlers for required characteristics
+        this.service.getCharacteristic(this.Characteristic.ProgrammableSwitchEvent)
+            .onGet(this.handleProgrammableSwitchEventGet.bind(this));
+
+        this.service.getCharacteristic(this.Characteristic.ProgrammableSwitchOutputState)
+            .onGet(this.handleProgrammableSwitchOutputStateGet.bind(this))
+            .onSet(this.handleProgrammableSwitchOutputStateSet.bind(this));
+
+    }
+
+
+
+    handleProgrammableSwitchEventGet() {
+        this.log.debug('Triggered GET ProgrammableSwitchEvent');
+
+        // set this to a valid value for ProgrammableSwitchEvent
+        const currentValue = this.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS;
+
+        return currentValue;
+    }
+
+
+
+    handleProgrammableSwitchOutputStateGet() {
+        this.log.debug('Triggered GET ProgrammableSwitchOutputState');
+
+        // set this to a valid value for ProgrammableSwitchOutputState
+        const currentValue = 1;
+
+        return currentValue;
+    }
+
+
+    handleProgrammableSwitchOutputStateSet(value) {
+        this.log.debug('Triggered SET ProgrammableSwitchOutputState:' + value);
     }
 
     setSnmp(oid, type, value) {
