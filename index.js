@@ -41,19 +41,19 @@ class UPS {
     }
 
     getFromSnmp(oid) {
-        this.session.get ([oid], function (error, varbinds) {
+        this.session.get([oid], function (error, varbinds) {
             if (error) {
-                console.error (error);
+                console.error(error);
             } else {
                 for (let i = 0; i < varbinds.length; i++) {
-                    if (snmp.isVarbindError (varbinds[i])) {
-                        console.error (snmp.varbindError (varbinds[i]));
+                    if (snmp.isVarbindError(varbinds[i])) {
+                        console.error(snmp.varbindError(varbinds[i]));
                     } else {
-                        console.log (varbinds[i].oid + " = " + varbinds[i].value);
+                        console.log(varbinds[i].oid + " = " + varbinds[i].value);
                     }
                 }
             }
-            this.session.close();
+            this.close();
         });
     }
 
