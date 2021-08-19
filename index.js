@@ -21,8 +21,8 @@ class UPS {
         };
 
 
-        this.Service = this.api.hap.Service;
-        this.Characteristic = this.api.hap.Characteristic;
+        let service = this.api.hap.Service;
+        let characteristic = this.api.hap.Characteristic;
 
         let informationService = new this.api.hap.Service.AccessoryInformation()
             .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
@@ -39,10 +39,10 @@ class UPS {
                             console.log(varbinds[0].oid + " = " + varbinds[0].value);
                             if (key === "model") {
                                 informationService
-                                    .setCharacteristic(this.api.hap.Characteristic.Model, varbinds[0].value)
-                                    .setCharacteristic(this.api.hap.Characteristic.Name, varbinds[0].value)
+                                    .setCharacteristic(characteristic.Model, varbinds[0].value)
+                                    .setCharacteristic(characteristic.Name, varbinds[0].value)
                             } else if (key === "serial_number") {
-                                informationService.setCharacteristic(this.api.hap.Characteristic.SerialNumber, varbinds[0].value)
+                                informationService.setCharacteristic(characteristic.SerialNumber, varbinds[0].value)
                             }
                         }
                     }
