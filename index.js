@@ -24,6 +24,9 @@ class UPS {
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
 
+        let informationService = new this.api.hap.Service.AccessoryInformation()
+            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
+
         for (const [key, value] of Object.entries(this.oids)) {
             if (key === "model" || key === "serial_number" || key === "firmware_rev") {
                 this.session.get([value], function (error, varbinds) {
@@ -34,7 +37,13 @@ class UPS {
                             console.error(snmp.varbindError(varbinds[0]));
                         } else {
                             console.log(varbinds[0].oid + " = " + varbinds[0].value);
-
+                            if (key === "model") {
+                                informationService
+                                    .setCharacteristic(this.api.hap.Characteristic.Model, varbinds[0].value)
+                                    .setCharacteristic(this.api.hap.Characteristic.Name, varbinds[0].value)
+                            } else if (key === "serial_number") {
+                                informationService.setCharacteristic(this.api.hap.Characteristic.SerialNumber, varbinds[0].value)
+                            }
                         }
                     }
                 });
@@ -42,22 +51,14 @@ class UPS {
         }
 
 
-
-        this.model = this.getSNMP(this.oids.model);
-        this.serial_number = this.getSNMP(this.oids.serial_number);
-        this.firmware_rev = this.getSNMP(this.oids.firmware_rev);
-
-        this.log("UPS Info:");
-        this.log("Model: " + this.model);
-        this.log("Serial Number: " + this.serial_number);
-        this.log("Firmware Rev.: " + this.firmware_rev);
-
-        this.informationService = new this.api.hap.Service.AccessoryInformation()
-            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
-            .setCharacteristic(this.api.hap.Characteristic.Model, this.model)
-            .setCharacteristic(this.api.hap.Characteristic.Name, this.model)
-            .setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.serial_number)
-            .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.firmware_rev);
+        //this.model = this.getSNMP(this.oids.model);
+        //this.serial_number = this.getSNMP(this.oids.serial_number);
+        //this.firmware_rev = this.getSNMP(this.oids.firmware_rev);
+//
+        //this.log("UPS Info:");
+        //this.log("Model: " + this.model);
+        //this.log("Serial Number: " + this.serial_number);
+        //this.log("Firmware Rev.: " + this.firmware_rev);
 
 
         this.switchService = new this.api.hap.Service.Switch(this.name);
