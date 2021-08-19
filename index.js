@@ -43,7 +43,7 @@ class UPS {
                             if (key === "model") {
                                 that.model = varbinds[0].value.toString();
                                 that.log("Model: " + that.model);
-                                //that.informationService.setCharacteristic(that.Characteristic.Model, that.model);
+                                that.informationService.setCharacteristic(that.Characteristic.Model, "SmartUPS 750 RM");
                                 //that.informationService.setCharacteristic(that.Characteristic.Name, that.model);
                             } else if (key === "serial_number") {
                                 that.serial_number = varbinds[0].value.toString();
