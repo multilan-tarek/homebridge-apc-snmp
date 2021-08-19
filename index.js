@@ -49,8 +49,8 @@ class UPS {
             .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
     }
 
-    async getSNMP(oid) {
-        return function() {
+    getSNMP(oid) {
+        return function () {
             return new Promise(value => {
                 this.session.get([oid], function (error, varbinds) {
                     if (error) {
