@@ -12,7 +12,7 @@ https://www.npmjs.com/package/homebridge-apc-snmp
 4. Chose a name for your accessory using the *name* setting, for example *UPS*
 5. Add *address* to the config and set it to your address of the snmp host, for example *10.0.30.3*
 6. Add *community* to the config and set it to a community that has **write access**, for example *private*
-7. Below are four config settings that enable the different switches
+7. Below are four config settings, they enable the different switches
 ```json
 "enable_non_graceful": true
 "enable_graceful": true
