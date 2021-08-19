@@ -63,6 +63,3 @@ class ApcSnmpUps {
         this.log.info('Setting switch state to:', value);
     }
 }
-
-y
-}
