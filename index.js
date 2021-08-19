@@ -190,8 +190,9 @@ class UPS {
 
     async getModelHandler() {
         this.log.debug('Triggered GET getModelHandler');
+        var that = this
         return await new Promise(function (resolve, reject) {
-            this.session.get([this.oids.model], function (error, varbinds) {
+            that.session.get([that.oids.model], function (error, varbinds) {
                 if (error) {
                     console.error(error);
                 } else {
