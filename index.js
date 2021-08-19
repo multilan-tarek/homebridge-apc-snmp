@@ -12,7 +12,7 @@ class UPS {
             this.batteryService,
             this.switchService,
             this.alarmSwitchService,
-            this.service
+            this.gracefulSwitchService
         ];
     }
 
@@ -33,6 +33,7 @@ class UPS {
             "alarm_state": "1.3.6.1.4.1.318.1.1.1.5.2.4.0",
             "turn_on": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.6.0", "type": snmp.ObjectType.INTEGER, "value": 2},
             "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 2},
+            "turn_off_graceful": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 3},
             "alarm_on": {"oid": "1.3.6.1.4.1.318.1.1.1.5.2.4.0", "type": snmp.ObjectType.INTEGER, "value": 1},
             "alarm_off": {"oid": "1.3.6.1.4.1.318.1.1.1.5.2.4.0", "type": snmp.ObjectType.INTEGER, "value": 3}
         };
@@ -87,48 +88,16 @@ class UPS {
             .onGet(this.getPowerStateHandler.bind(this))
             .onSet(this.setPowerStateHandler.bind(this));
 
+        this.gracefulSwitchService = new this.Service.Switch(this.name + " (Graceful)", "Graceful");
+        this.gracefulSwitchService.getCharacteristic(this.Characteristic.On)
+            .onGet(this.getPowerStateHandler.bind(this))
+            .onSet(this.setGracefulPowerStateHandler.bind(this));
+
         this.alarmSwitchService = new this.Service.Switch(this.name + " Alarm", "Alarm");
         this.alarmSwitchService.getCharacteristic(this.Characteristic.On)
             .onGet(this.getAlarmStateHandler.bind(this))
             .onSet(this.setAlarmStateHandler.bind(this));
 
-        this.service = new this.Service.StatelessProgrammableSwitch(this.name);
-
-        // create handlers for required characteristics
-        this.service.getCharacteristic(this.Characteristic.ProgrammableSwitchEvent)
-            .onGet(this.handleProgrammableSwitchEventGet.bind(this));
-
-        this.service.getCharacteristic(this.Characteristic.ProgrammableSwitchOutputState)
-            .onGet(this.handleProgrammableSwitchOutputStateGet.bind(this))
-            .onSet(this.handleProgrammableSwitchOutputStateSet.bind(this));
-
-    }
-
-
-
-    handleProgrammableSwitchEventGet() {
-        this.log.debug('Triggered GET ProgrammableSwitchEvent');
-
-        // set this to a valid value for ProgrammableSwitchEvent
-        const currentValue = this.Characteristic.ProgrammableSwitchEvent.SINGLE_PRESS;
-
-        return currentValue;
-    }
-
-
-
-    handleProgrammableSwitchOutputStateGet() {
-        this.log.debug('Triggered GET ProgrammableSwitchOutputState');
-
-        // set this to a valid value for ProgrammableSwitchOutputState
-        const currentValue = 1;
-
-        return currentValue;
-    }
-
-
-    handleProgrammableSwitchOutputStateSet(value) {
-        this.log.debug('Triggered SET ProgrammableSwitchOutputState:' + value);
     }
 
     setSnmp(oid, type, value) {
@@ -146,7 +115,6 @@ class UPS {
             }
         });
     }
-
 
     async getPowerStateHandler() {
         this.log.debug('Triggered GET getPowerStateHandler');
@@ -171,6 +139,15 @@ class UPS {
             this.setSnmp(this.oids.turn_on.oid, this.oids.turn_on.type, this.oids.turn_on.value);
         } else {
             this.setSnmp(this.oids.turn_off.oid, this.oids.turn_off.type, this.oids.turn_off.value);
+        }
+    }
+
+    async setGracefulPowerStateHandler(value) {
+        this.log.debug('Triggered SET setGracefulPowerStateHandler');
+        if (value === true) {
+            this.setSnmp(this.oids.turn_on.oid, this.oids.turn_on.type, this.oids.turn_on.value);
+        } else {
+            this.setSnmp(this.oids.turn_off_graceful.oid, this.oids.turn_off_graceful.type, this.oids.turn_off_graceful.value);
         }
     }
 
