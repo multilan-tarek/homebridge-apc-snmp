@@ -11,6 +11,7 @@ class UPS {
         this.config = config;
         this.api = api;
         this.session = snmp.createSession("10.0.30.3", "private");
+        this.name = config.name;
         this.oids = {
             "model": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
             "manufacturer": "APC",
