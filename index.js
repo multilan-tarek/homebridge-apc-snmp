@@ -51,11 +51,13 @@ class UPS {
                             console.error(snmp.varbindError(varbinds[0]));
                         } else {
                             if (key === "model") {
-                                that.model = varbinds[0].value.toString();
+                                that.log("Model: " + varbinds[0].value.toString());
+                                that.log("Manufacturer: " + "APC")
+                                that.informationService.setCharacteristic(that.Characteristic.Model, varbinds[0].value.toString());
                             } else if (key === "serial_number") {
-                                that.serial_number = varbinds[0].value.toString();
+                                that.log("Serial Number: " + varbinds[0].value.toString());
                             } else if (key === "firmware_rev") {
-                                that.firmware_rev = varbinds[0].value.toString();
+                                that.log("Firmware Rev.: " + varbinds[0].value.toString());
                             }
                         }
                     }
@@ -63,16 +65,16 @@ class UPS {
             }
         }
 
-        this.log.info("UPS Information:")
-        this.log("Model: " + this.model);
-        this.log("Manufacturer: " + "APC")
-        this.log("Serial Number: " + this.serial_number);
-        this.log("Firmware Rev.: " + this.firmware_rev);
 
-        this.informationService.setCharacteristic(this.Characteristic.Model, this.model);
-        this.informationService.setCharacteristic(this.Characteristic.Name, this.model);
-        this.informationService.setCharacteristic(this.Characteristic.SerialNumber, this.serial_number);
-        this.informationService.setCharacteristic(this.Characteristic.FirmwareRevision, this.firmware_rev);
+
+
+
+
+
+
+        //this.informationService.setCharacteristic(this.Characteristic.Name, this.model);
+        //this.informationService.setCharacteristic(this.Characteristic.SerialNumber, this.serial_number);
+        //this.informationService.setCharacteristic(this.Characteristic.FirmwareRevision, this.firmware_rev);
 
         this.batteryService = new this.Service.BatteryService(this.name)
         this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery)
