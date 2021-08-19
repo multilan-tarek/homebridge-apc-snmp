@@ -59,6 +59,7 @@ class UPS {
                     if (snmp.isVarbindError (varbinds[i])) {
                         console.error (snmp.varbindError (varbinds[i]));
                     } else {
+                        console.log(varbinds[i].oid + "|" + varbinds[i].value);
                         return varbinds[i].value;
                     }
                 }
