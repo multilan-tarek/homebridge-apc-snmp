@@ -109,7 +109,7 @@ class UPS {
                 if (snmp.isVarbindError(varbinds[0])) {
                     console.error(snmp.varbindError(varbinds[0]));
                 } else {
-                    that.model = varbinds[0].value.toString();
+                    that.model = varbinds[0].value;
                 }
             }
         });
@@ -126,7 +126,7 @@ class UPS {
                 if (snmp.isVarbindError(varbinds[0])) {
                     console.error(snmp.varbindError(varbinds[0]));
                 } else {
-                    that.serial_number = varbinds[0].value.toString();
+                    that.serial_number = varbinds[0].value;
                 }
             }
         });
@@ -143,7 +143,7 @@ class UPS {
                 if (snmp.isVarbindError(varbinds[0])) {
                     console.error(snmp.varbindError(varbinds[0]));
                 } else {
-                    that.firmware_rev = varbinds[0].value.toString();
+                    that.firmware_rev = varbinds[0].value;
                 }
             }
         });
