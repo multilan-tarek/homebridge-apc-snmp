@@ -11,7 +11,7 @@ class UPS {
             this.informationService,
             this.batteryService,
             this.switchService,
-            this.switchService2
+            this.alarmSwitchService
 
         ];
     }
