@@ -16,8 +16,8 @@ class UPS {
             "manufacturer": "APC",
             "serial_number": "1.3.6.1.4.1.318.1.1.1.1.2.3.0",
             "firmware_rev": "1.3.6.1.4.1.318.1.1.1.1.2.1.0",
-            "turn_on": {"oid": "", "type": snmp.ObjectType.INTEGER, "value": 2},
-            "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.6.0", "type": snmp.ObjectType.INTEGER, "value": 2}
+            "turn_on": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.6.0", "type": snmp.ObjectType.INTEGER, "value": 2},
+            "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 2}
         };
 
 
@@ -53,17 +53,16 @@ class UPS {
         this.session.get([oid], function (error, varbinds) {
             if (error) {
                 console.error(error);
+                return "N/A";
             } else {
-                for (let i = 0; i < varbinds.length; i++) {
-                    if (snmp.isVarbindError (varbinds[i])) {
-                        console.error (snmp.varbindError (varbinds[i]));
-                    } else {
-                        return varbinds[i].value;
-                    }
+                if (snmp.isVarbindError (varbinds[0])) {
+                    console.error (snmp.varbindError (varbinds[0]));
+                    return "N/A";
+                } else {
+                    return varbinds[0].value;
                 }
             }
         });
-        return "-"
     }
 
     setSnmp(oid, type, value) {
@@ -81,7 +80,6 @@ class UPS {
                 }
             }
         });
-        return "-"
     }
 
 
