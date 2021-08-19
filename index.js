@@ -16,6 +16,7 @@ class UPS {
             "manufacturer": "APC",
             "serial_number": "1.3.6.1.4.1.318.1.1.1.1.2.3.0",
             "firmware_rev": "1.3.6.1.4.1.318.1.1.1.1.2.1.0",
+            "out_volt": "1.3.6.1.4.1.318.1.1.1.4.2.1.0",
             "turn_on": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.6.0", "type": snmp.ObjectType.INTEGER, "value": 2},
             "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 2}
         };
@@ -117,12 +118,20 @@ class UPS {
     }
 
     async getOnHandler() {
-        this.log.info('Getting switch state');
-
-        // get the current value of the switch in your own code
-        const value = false;
-
-        return value;
+        var that = this
+        this.session.get([this.oids.out_volt], function (error, varbinds) {
+            if (error) {
+                console.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    that.out_volt = varbinds[0].value.toString();
+                }
+            }
+        });
+        console.log(this.out_volt);
+        return false;
     }
 
     async setOnHandler(value) {
