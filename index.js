@@ -30,7 +30,7 @@ class UPS {
         let serial_number = "";
         let firmware_rev = "";
 
-        for (const [key, oid] of Object.entries(this.oids)) {
+        for (const [key, oid] of Object.entries(this.oids.info)) {
             this.session.get([oid], function (error, varbinds) {
                 if (error) {
                     console.error(error);
