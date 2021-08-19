@@ -40,7 +40,11 @@ class UPS {
         this.informationService = new this.Service.AccessoryInformation()
             .setCharacteristic(this.Characteristic.Manufacturer, "APC")
         this.informationService.getCharacteristic(this.Characteristic.Model)
-            .onGet(this.updateAccessoryInformation.bind(this))
+            .onGet(this.getModelHandler.bind(this))
+        this.informationService.getCharacteristic(this.Characteristic.SerialNumber)
+            .onGet(this.getSerialNumberHandler.bind(this))
+        this.informationService.getCharacteristic(this.Characteristic.FirmwareRevision)
+            .onGet(this.getFirmwareRevHandler.bind(this))
 
         var that = this
         for (const [key, value] of Object.entries(this.oids)) {
@@ -95,25 +99,55 @@ class UPS {
         });
     }
 
-    async updateAccessoryInformation() {
+    async getModelHandler() {
+        this.log.debug('Triggered GET getModelHandler');
         var that = this
-        console.log("Updating")
-        for (const [key, value] of Object.entries(that.oids)) {
-            if (key === "model" || key === "serial_number" || key === "firmware_rev") {
-                this.session.get([value], function (error, varbinds) {
-                    if (error) {
-                        console.error(error);
-                    } else {
-                        if (snmp.isVarbindError(varbinds[0])) {
-                            console.error(snmp.varbindError(varbinds[0]));
-                        } else {
-                            that.value = varbinds[0].value.toString();
-                        }
-                    }
-                });
+        this.session.get([this.oids.model], function (error, varbinds) {
+            if (error) {
+                console.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    that.model = varbinds[0].value.toString();
+                }
             }
-        }
-        console.log(this.value)
+        });
+        return this.model;
+    }
+
+    async getSerialNumberHandler() {
+        this.log.debug('Triggered GET getSerialNumberHandler');
+        var that = this
+        this.session.get([this.oids.serial_number], function (error, varbinds) {
+            if (error) {
+                console.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    that.serial_number = varbinds[0].value.toString();
+                }
+            }
+        });
+        return this.serial_number;
+    }
+
+    async getFirmwareRevHandler() {
+        this.log.debug('Triggered GET getFirmwareRevHandler');
+        var that = this
+        this.session.get([this.oids.firmware_rev], function (error, varbinds) {
+            if (error) {
+                console.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    that.firmware_rev = varbinds[0].value.toString();
+                }
+            }
+        });
+        return this.firmware_rev;
     }
 
     async getPowerStateHandler() {
