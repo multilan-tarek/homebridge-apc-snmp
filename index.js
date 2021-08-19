@@ -60,12 +60,13 @@ class UPS {
         }
 
 
-
+        this.batteryService =new this.Service.BatteryService(this.name)
+        this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery)
+            .on('get', this.getLowBatteryHandler.bind(this));
 
 
         this.switchService = new this.Service.Switch(this.name);
-
-        this.switchService.getCharacteristic(this.api.hap.Characteristic.On)
+        this.switchService.getCharacteristic(this.Characteristic.On)
             .onGet(this.getPowerStateHandler.bind(this))
             .onSet(this.setPowerStateHandler.bind(this));
     }
@@ -136,6 +137,13 @@ class UPS {
         } else {
             this.setSnmp(this.oids.turn_off.oid, this.oids.turn_off.type, this.oids.turn_off.value);
         }
+    }
+
+    async getLowBatteryHandler() {
+        this.log.debug('Triggered GET StatusLowBattery');
+
+        // set this to a valid value for StatusLowBattery
+        return this.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
     }
 
 
