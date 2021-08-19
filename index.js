@@ -24,10 +24,11 @@ class UPS {
 
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
-        console.log(this.getSnmp(this.oids.model));
-        this.model = this.getSnmp(this.oids.model);
-        this.serial_number = this.getSnmp(this.oids.serial_number);
-        this.firmware_rev = this.getSnmp(this.oids.firmware_rev);
+
+
+        this.model = this.getSnmpSync(this.oids.model);
+        this.serial_number = this.getSnmpSync(this.oids.serial_number);
+        this.firmware_rev = this.getSnmpSync(this.oids.firmware_rev);
 
         this.log("UPS Info:");
         this.log("Model: " + this.model);
@@ -50,24 +51,28 @@ class UPS {
             .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
     }
 
-    async getSnmp(oid) {
-        let z = "test"
-        await this.session.get([oid], function (error, varbinds) {
-            if (error) {
-                console.error(error);
-            } else {
-                if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
+    getSnmpSync(oid) {
+        const result = new Promise(function executor(resolve, reject) {
+            this.session.get([oid], function (error, varbinds) {
+                if (error) {
+                    console.error(error);
                 } else {
-                    console.log(varbinds[0].oid + "|" + varbinds[0].value);
-                    console.log(z)
-                    console.log(varbinds[0].value.toString())
-                    z = varbinds[0].value.toString();
-                    console.log(z)
+                    if (snmp.isVarbindError(varbinds[0])) {
+                        console.error(snmp.varbindError(varbinds[0]));
+                    } else {
+                        console.log(varbinds[0].oid + "|" + varbinds[0].value);
+                        console.log(z)
+                        console.log(varbinds[0].value.toString())
+                        z = varbinds[0].value.toString();
+                        console.log(z)
+                        resolve(z)
+                    }
                 }
-            }
+            });
         });
-        return z;
+
+
+        return result;
     }
 
     setSnmp(oid, type, value) {
