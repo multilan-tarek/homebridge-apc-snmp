@@ -11,6 +11,7 @@ class UPS {
             this.informationService,
             this.batteryService,
             this.switchService,
+            this.switchService2
 
         ];
     }
@@ -51,10 +52,10 @@ class UPS {
             if (key === "model" || key === "serial_number" || key === "firmware_rev") {
                 this.session.get([value], function (error, varbinds) {
                     if (error) {
-                        console.error(error);
+                        that.log.error(error);
                     } else {
                         if (snmp.isVarbindError(varbinds[0])) {
-                            console.error(snmp.varbindError(varbinds[0]));
+                            that.log.error(snmp.varbindError(varbinds[0]));
                         } else {
                             if (key === "model") {
                                 that.log("Model: " + varbinds[0].value.toString());
@@ -82,18 +83,24 @@ class UPS {
         this.switchService.getCharacteristic(this.Characteristic.On)
             .onGet(this.getPowerStateHandler.bind(this))
             .onSet(this.setPowerStateHandler.bind(this));
+
+        this.switchService2 = new this.Service.Switch(this.name);
+        this.switchService2.getCharacteristic(this.Characteristic.On)
+            .onGet(this.getPowerStateHandler.bind(this))
+            .onSet(this.setPowerStateHandler.bind(this));
     }
 
     setSnmp(oid, type, value) {
+        var that = this;
         this.session.set([{oid, type, value}], function (error, varbinds) {
             if (error) {
-                console.error(error.toString());
+                that.log.error(error.toString());
             } else {
                 for (let i = 0; i < varbinds.length; i++) {
                     if (snmp.isVarbindError(varbinds[i]))
-                        console.error(snmp.varbindError(varbinds[i]));
+                        that.log.error(snmp.varbindError(varbinds[i]));
                     else
-                        console.log(varbinds[i].oid + "|" + varbinds[i].value);
+                        that.log.info("Set " + varbinds[i].oid + " to value " + varbinds[i].value);
                 }
             }
         });
@@ -105,10 +112,10 @@ class UPS {
         var that = this
         this.session.get([this.oids.out_volt], function (error, varbinds) {
             if (error) {
-                console.error(error);
+                that.log.error(error);
             } else {
                 if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
+                    that.log.error(snmp.varbindError(varbinds[0]));
                 } else {
                     that.out_volt = varbinds[0].value.toString();
                 }
@@ -131,10 +138,10 @@ class UPS {
         var that = this
         this.session.get([this.oids.bat_status], function (error, varbinds) {
             if (error) {
-                console.error(error);
+                that.log.error(error);
             } else {
                 if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
+                    that.log.error(snmp.varbindError(varbinds[0]));
                 } else {
                     that.bat_status = varbinds[0].value.toString();
                 }
@@ -156,10 +163,10 @@ class UPS {
         var that = this
         this.session.get([this.oids.bat_capacity], function (error, varbinds) {
             if (error) {
-                console.error(error);
+                that.log.error(error);
             } else {
                 if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
+                    that.log.error(snmp.varbindError(varbinds[0]));
                 } else {
                     that.bat_capacity = varbinds[0].value.toString();
                 }
@@ -173,10 +180,10 @@ class UPS {
         var that = this
         this.session.get([this.oids.time_on_bat], function (error, varbinds) {
             if (error) {
-                console.error(error);
+                that.log.error(error);
             } else {
                 if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
+                    that.log.error(snmp.varbindError(varbinds[0]));
                 } else {
                     that.time_on_bat = varbinds[0].value.toString();
                 }
@@ -196,11 +203,11 @@ class UPS {
         return await new Promise(function (resolve, reject) {
             that.session.get([that.oids.model], function (error, varbinds) {
                 if (error) {
-                    console.error(error);
+                    that.log.error(error);
                     reject(error)
                 } else {
                     if (snmp.isVarbindError(varbinds[0])) {
-                        console.error(snmp.varbindError(varbinds[0]));
+                        that.log.error(snmp.varbindError(varbinds[0]));
                         reject(error)
                     } else {
                         var value = varbinds[0].value.toString()
@@ -217,11 +224,11 @@ class UPS {
         return await new Promise(function (resolve, reject) {
             that.session.get([that.oids.serial_number], function (error, varbinds) {
                 if (error) {
-                    console.error(error);
+                    that.log.error(error);
                     reject(error)
                 } else {
                     if (snmp.isVarbindError(varbinds[0])) {
-                        console.error(snmp.varbindError(varbinds[0]));
+                        that.log.error(snmp.varbindError(varbinds[0]));
                         reject(error)
                     } else {
                         var value = varbinds[0].value.toString()
@@ -238,11 +245,11 @@ class UPS {
         return await new Promise(function (resolve, reject) {
             that.session.get([that.oids.firmware_rev], function (error, varbinds) {
                 if (error) {
-                    console.error(error);
+                    that.log.error(error);
                     reject(error)
                 } else {
                     if (snmp.isVarbindError(varbinds[0])) {
-                        console.error(snmp.varbindError(varbinds[0]));
+                        that.log.error(snmp.varbindError(varbinds[0]));
                         reject(error)
                     } else {
                         var value = varbinds[0].value.toString()
