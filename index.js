@@ -50,9 +50,9 @@ class UPS {
             .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
     }
 
-    getSnmp(oid) {
+    async getSnmp(oid) {
         let z = "test"
-        this.session.get([oid], function (error, varbinds) {
+        await this.session.get([oid], function (error, varbinds) {
             if (error) {
                 console.error(error);
             } else {
