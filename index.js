@@ -50,28 +50,30 @@ class UPS {
     }
 
     getSnmp(oid) {
-        return (this.session.get([oid], function (error, varbinds) {
+        let value
+        this.session.get([oid], function (error, varbinds) {
             if (error) {
                 console.error(error);
             } else {
-                    if (snmp.isVarbindError (varbinds[0])) {
-                        console.error (snmp.varbindError (varbinds[0]));
-                    } else {
-                        console.log(varbinds[0].oid + "|" + varbinds[0].value);
-                        return varbinds[0].value;
-                    }
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    console.log(varbinds[0].oid + "|" + varbinds[0].value);
+                    value = varbinds[0].value;
+                }
             }
-        }));
+        });
+        return value;
     }
 
     setSnmp(oid, type, value) {
-        this.session.set ([{oid, type, value}], function (error, varbinds) {
+        this.session.set([{oid, type, value}], function (error, varbinds) {
             if (error) {
                 console.error(error.toString());
             } else {
                 for (let i = 0; i < varbinds.length; i++) {
-                    if (snmp.isVarbindError (varbinds[i]))
-                        console.error(snmp.varbindError (varbinds[i]));
+                    if (snmp.isVarbindError(varbinds[i]))
+                        console.error(snmp.varbindError(varbinds[i]));
                     else
                         console.log(varbinds[i].oid + "|" + varbinds[i].value);
                 }
