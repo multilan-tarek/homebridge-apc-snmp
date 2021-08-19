@@ -64,8 +64,8 @@ class UPS {
                 }
             }
         });
-        while (value == "") {
-            // do nothing
+        while (value === "") {
+            console.log(value)
         }
         return value;
     }
