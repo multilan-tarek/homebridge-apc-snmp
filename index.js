@@ -142,7 +142,7 @@ class UPS {
     }
 
     async getLowBatteryHandler() {
-        this.log.debug('Triggered GET StatusLowBattery');
+        this.log.info('Triggered GET StatusLowBattery');
 
         // set this to a valid value for StatusLowBatter
         console.log(this.Characteristic.BATTERY_LEVEL_LOW)
@@ -150,10 +150,10 @@ class UPS {
     }
 
     async getBatteryLevelHandler() {
-        this.log.debug('Triggered GET getBatteryLevelHandler');
+        this.log.info('Triggered GET getBatteryLevelHandler');
 
         // set this to a valid value for StatusLowBattery
-        return this.Characteristic.BATTERY_LEVEL_NORMAL;
+        return this.Characteristic.BATTERY_LEVEL_LOW;
     }
 
 }
