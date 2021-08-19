@@ -1,9 +1,8 @@
 module.exports = (api) => {
-    api.registerAccessory('ExampleBatteryPlugin', ExampleBatteryAccessory);
+    api.registerAccessory('apc_snmp_ups', ApcSnmpUps);
 };
 
-class ExampleBatteryAccessory {
-
+class ApcSnmpUps {
     constructor(log, config, api) {
         this.log = log;
         this.config = config;
@@ -12,14 +11,12 @@ class ExampleBatteryAccessory {
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
 
-        // extract name from config
         this.name = config.name;
 
-        // create a new Battery service
-        this.service = new this.Service(this.Service.Battery);
+        this.battery_service = new this.Service(this.Service.Battery);
 
         // create handlers for required characteristics
-        this.service.getCharacteristic(this.Characteristic.StatusLowBattery)
+        this.battery_service.getCharacteristic(this.Characteristic.StatusLowBattery)
             .onGet(this.handleStatusLowBatteryGet.bind(this));
 
     }
@@ -31,8 +28,6 @@ class ExampleBatteryAccessory {
         this.log.debug('Triggered GET StatusLowBattery');
 
         // set this to a valid value for StatusLowBattery
-        const currentValue = this.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
-
-        return currentValue;
+        return this.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
     }
 }
