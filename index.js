@@ -43,14 +43,14 @@ class UPS {
     }
 
     getFromSnmp(oid) {
-        this.session.get(oid, function (error, varbinds) {
+        this.session.get([oid], function (error, varbinds) {
             if (error) {
                 console.error(error);
             } else {
-                if (snmp.isVarbindError(varbinds)) {
-                    console.error(snmp.varbindError(varbinds));
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
                 } else {
-                    return varbinds.value;
+                    return varbinds[0].value;
                 }
             }
         });
