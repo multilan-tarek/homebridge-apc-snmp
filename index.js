@@ -59,9 +59,11 @@ class UPS {
                 } else {
                     console.log(varbinds[0].oid + "|" + varbinds[0].value);
                     snmp_value = varbinds[0].value;
+                    console.log(snmp_value)
                 }
             }
         });
+        console.log(snmp_value)
         return snmp_value;
     }
 
