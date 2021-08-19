@@ -18,6 +18,7 @@ class UPS {
             "firmware_rev": "1.3.6.1.4.1.318.1.1.1.1.2.1.0",
             "out_volt": "1.3.6.1.4.1.318.1.1.1.4.2.1.0",
             "bat_capacity": "1.3.6.1.4.1.318.1.1.1.2.2.1.0",
+            "bat_status": "1.3.6.1.4.1.318.1.1.1.2.1.1.0",
             "turn_on": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.6.0", "type": snmp.ObjectType.INTEGER, "value": 2},
             "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 2}
         };
@@ -148,8 +149,25 @@ class UPS {
 
     async getLowBatteryHandler() {
         this.log.debug('Triggered GET getLowBatteryHandler');
-        this.log.info("Battery low")
-        return 1;
+
+        var that = this
+        this.session.get([this.oids.bat_status], function (error, varbinds) {
+            if (error) {
+                console.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    that.bat_status = varbinds[0].value.toString();
+                }
+            }
+        });
+
+        if (this.bat_status <= 2) {
+            return 0
+        } else if (this.bat_status === 3) {
+            return 1
+        }
     }
 
     async getBatteryLevelHandler() {
