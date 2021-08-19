@@ -1,4 +1,3 @@
-
 var snmp = require("net-snmp");
 
 
@@ -52,6 +51,7 @@ class UPS {
     }
 
     getSnmpSync(oid) {
+        var value
         const session = this.session;
         const promise = new Promise(function executor(resolve, reject) {
             session.get([oid], function (error, varbinds) {
@@ -67,12 +67,10 @@ class UPS {
                 }
             });
         });
-
-        return promise.then(function(resolve) {
-            console.log(resolve)
-            return resolve;
+        promise.then(function (resolve) {
+            value = resolve
         });
-
+        return value;
     }
 
     setSnmp(oid, type, value) {
