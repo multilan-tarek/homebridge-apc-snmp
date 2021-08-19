@@ -79,7 +79,7 @@ class UPS {
 
         const PowerService = function (displayName, subtype) {
             that.Service.call(this, displayName, '00000001-0000-1000-8000-135D67EC4377', subtype)
-            this.addCharacteristic(that.CommunityTypes.InputVoltageAC)
+            this.addCharacteristic(that.CommunityTypes.Volts)
             //this.addCharacteristic(that.CommunityTypes.BatteryVoltageDC)
             //this.addCharacteristic(that.CommunityTypes.UPSLoadPercent)
             //this.addCharacteristic(that.CommunityTypes.Volts)
@@ -94,7 +94,8 @@ class UPS {
         inherits(PowerService, this.Service)
 
         this.powerService = new PowerService()
-        this.powerService.getCharacteristic(this.CommunityTypes.InputVoltageAC)
+        this.powerService.getCharacteristic(this.CommunityTypes.Volts)
+
             .onGet(this.getInputVoltageHandler.bind(this))
         //this.powerService
         //    .getCharacteristic(CommunityTypes.BatteryVoltageDC)
@@ -136,10 +137,11 @@ class UPS {
      */
     getServices() {
         return [
+            this.powerService,
             this.informationService,
             //this.batteryService,
             this.switchService,
-            this.powerService
+
         ];
     }
 
