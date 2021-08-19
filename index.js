@@ -65,7 +65,7 @@ class UPS {
             }
         }
 
-
+        this.informationService.setCharacteristic(that.api.hap.Characteristic.Model, "smartups");
 
 
 
