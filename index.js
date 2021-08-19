@@ -1,4 +1,5 @@
 var snmp = require("net-snmp");
+var model = "scheisse"
 
 
 module.exports = (api) => {
@@ -28,21 +29,21 @@ class UPS {
 
         this.log("UPS Info:");
         this.getSnmpSync(this.oids.model).then(function (resolve) {
-            this.model = resolve;
-            this.log("Model: " + this.model);
-            this.informationService.setCharacteristic(this.api.hap.Characteristic.Model, this.model);
-            this.informationService.setCharacteristic(this.api.hap.Characteristic.Name, this.model);
+            model = resolve;
+            this.log("Model: " + model);
+            this.informationService.setCharacteristic(this.api.hap.Characteristic.Model, model);
+            this.informationService.setCharacteristic(this.api.hap.Characteristic.Name, model);
         });
-        this.getSnmpSync(this.oids.serial_number).then(function (resolve) {
-            this.serial_number = resolve;
-            this.log("Serial Number: " + this.serial_number);
-            this.informationService.setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.serial_number);
-        });
-        this.getSnmpSync(this.oids.firmware_rev).then(function (resolve) {
-            this.firmware_rev = resolve;
-            this.log("Firmware Rev.: " + this.firmware_rev);
-            this.informationService.setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.firmware_rev);
-        });
+        //this.getSnmpSync(this.oids.serial_number).then(function (resolve) {
+        //    this.serial_number = resolve;
+        //    this.log("Serial Number: " + this.serial_number);
+        //    this.informationService.setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.serial_number);
+        //});
+        //this.getSnmpSync(this.oids.firmware_rev).then(function (resolve) {
+        //    this.firmware_rev = resolve;
+        //    this.log("Firmware Rev.: " + this.firmware_rev);
+        //    this.informationService.setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.firmware_rev);
+        //});
 
 
 
