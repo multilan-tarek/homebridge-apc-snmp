@@ -190,21 +190,20 @@ class UPS {
 
     async getModelHandler() {
         this.log.debug('Triggered GET getModelHandler');
-        var that = this
-        this.session.get([this.oids.model], function (error, varbinds) {
-            if (error) {
-                console.error(error);
-            } else {
-                if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
+        return await new Promise(function (resolve, reject) {
+            this.session.get([this.oids.model], function (error, varbinds) {
+                if (error) {
+                    console.error(error);
                 } else {
-                    console.log( varbinds[0].value.toString())
-                    that.model_ = varbinds[0].value.toString();
+                    if (snmp.isVarbindError(varbinds[0])) {
+                        console.error(snmp.varbindError(varbinds[0]));
+                    } else {
+                        var value = varbinds[0].value.toString()
+                        resolve(value)
+                    }
                 }
-            }
+            });
         });
-        console.log(this.model_)
-        return this.model_;
     }
 
     async getSerialNumberHandler() {
