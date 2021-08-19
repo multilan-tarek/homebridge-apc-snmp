@@ -39,7 +39,6 @@ class UPS {
 
         this.informationService = new this.api.hap.Service.AccessoryInformation()
             .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
-            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "test");
 
         var that = this
         for (const [key, value] of Object.entries(this.oids)) {
@@ -54,7 +53,7 @@ class UPS {
                             if (key === "model") {
                                 that.log("Model: " + varbinds[0].value.toString());
                                 that.log("Manufacturer: " + "APC")
-                                //that.informationService.setCharacteristic(that.api.hap.Characteristic.Manufacturer, varbinds[0].value.toString());
+                                that.informationService.setCharacteristic(that.api.hap.Characteristic.Model, varbinds[0].value.toString());
                             } else if (key === "serial_number") {
                                 that.log("Serial Number: " + varbinds[0].value.toString());
                             } else if (key === "firmware_rev") {
