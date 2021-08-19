@@ -98,7 +98,8 @@ class UPS {
 
     async updateAccessoryInformation() {
         var that = this
-        for (const [key, value] of Object.entries(this.oids)) {
+        console.log("Updating")
+        for (const [key, value] of Object.entries(that.oids)) {
             if (key === "model" || key === "serial_number" || key === "firmware_rev") {
                 this.session.get([value], function (error, varbinds) {
                     if (error) {
