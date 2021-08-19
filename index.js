@@ -63,6 +63,8 @@ class UPS {
         this.batteryService =new this.Service.BatteryService(this.name)
         this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery)
             .onGet(this.getLowBatteryHandler.bind(this))
+
+        this.batteryService.getCharacteristic(this.Characteristic.BatteryLevel)
             .onGet(this.getBatteryLevelHandler.bind(this));
 
 
