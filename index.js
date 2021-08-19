@@ -6,15 +6,9 @@ module.exports = (api) => {
 
 
 class UPS {
+    services = [this.informationService, this.batteryService,]
     getServices() {
-        return [
-            this.informationService,
-            this.batteryService,
-            this.switchService,
-            this.alarmSwitchService,
-            this.gracefulSwitchService,
-            this.selftestSwitchService
-        ];
+        return this.services;
     }
 
     constructor(log, config, api) {
@@ -105,6 +99,19 @@ class UPS {
         this.selftestSwitchService.getCharacteristic(this.Characteristic.On)
             .onGet(this.getSelftestHandler.bind(this))
             .onSet(this.setSelftestHandler.bind(this));
+
+        if (this.config.enable_non_graceful === true) {
+            this.services.push(this.switchService);
+        }
+        if (this.config.enable_graceful === true) {
+            this.services.push(this.gracefulSwitchService)
+        }
+        if (this.config.enable_alarm === true) {
+            this.services.push(this.alarmSwitchService)
+        }
+        if (this.config.enable_selftest === true) {
+            this.services.push(this.selftestSwitchService)
+        }
 
     }
 
