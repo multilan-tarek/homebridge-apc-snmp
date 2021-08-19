@@ -23,6 +23,7 @@ class UPS {
 
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
+
         console.log(this.getSnmp(this.oids.model));
         this.model = this.getSnmp(this.oids.model);
         this.serial_number = this.getSnmp(this.oids.serial_number);
@@ -59,12 +60,12 @@ class UPS {
                 } else {
                     console.log(varbinds[0].oid + "|" + varbinds[0].value);
                     snmp_value = varbinds[0].value;
-                    console.log(varbinds[0].value)
-                    console.log(snmp_value)
+                    console.log(varbinds[0].value + "0")
+                    console.log(snmp_value + "1")
                 }
             }
         });
-        console.log(snmp_value)
+        console.log(snmp_value + "2")
         return snmp_value;
     }
 
