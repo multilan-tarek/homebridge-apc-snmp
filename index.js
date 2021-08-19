@@ -1,5 +1,5 @@
 var snmp = require("net-snmp");
-
+var snmp_value = "";
 
 module.exports = (api) => {
     api.registerAccessory('ups', UPS);
@@ -50,7 +50,6 @@ class UPS {
     }
 
     getSnmp(oid) {
-        let value = ""
         this.session.get([oid], function (error, varbinds) {
             if (error) {
                 console.error(error);
@@ -59,23 +58,25 @@ class UPS {
                     console.error(snmp.varbindError(varbinds[0]));
                 } else {
                     console.log(varbinds[0].oid + "|" + varbinds[0].value);
-                    value = varbinds[0].value;
+                    snmp_value = varbinds[0].value;
                 }
             }
         });
-        return value;
+        return snmp_value;
     }
 
     setSnmp(oid, type, value) {
         this.session.set([{oid, type, value}], function (error, varbinds) {
             if (error) {
                 console.error(error.toString());
+                return false;
             } else {
-                for (let i = 0; i < varbinds.length; i++) {
-                    if (snmp.isVarbindError(varbinds[i]))
-                        console.error(snmp.varbindError(varbinds[i]));
-                    else
-                        console.log(varbinds[i].oid + "|" + varbinds[i].value);
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
+                    return false;
+                } else {
+                    console.log(varbinds[0].oid + "|" + varbinds[0].value);
+                    return true;
                 }
             }
         });
