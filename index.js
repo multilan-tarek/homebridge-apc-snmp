@@ -24,8 +24,10 @@ class UPS {
         var service = this.api.hap.Service;
         var characteristic = this.api.hap.Characteristic;
 
-        var informationService = new service.AccessoryInformation()
+        this.informationService = new service.AccessoryInformation()
             .setCharacteristic(characteristic.Manufacturer, "APC")
+
+        var informationService = this.informationService;
 
         for (const [key, value] of Object.entries(this.oids)) {
             if (key === "model" || key === "serial_number" || key === "firmware_rev") {
