@@ -12,12 +12,10 @@ class UPS {
         this.api = api;
         this.session = snmp.createSession("10.0.30.3", "private");
         this.oids = {
-            "info": {
-                "model": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
-                "manufacturer": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
-                "serial_number": "1.3.6.1.4.1.318.1.1.1.1.2.3.0",
-                "firmware_rev": "1.3.6.1.4.1.318.1.1.1.1.2.1.0",
-            },
+            "model": "1.3.6.1.4.1.318.1.1.1.1",
+            "manufacturer": "1.3.6.1.4.1.318.1.1.1.1",
+            "serial_number": "1.3.6.1.4.1.318.1.1.1.1",
+            "firmware_rev": "1.3.6.1.4.1.318.1.1.1.1.2.1.0",
             "turn_on": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.6.0", "type": snmp.ObjectType.INTEGER, "value": 2},
             "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 2}
         };
@@ -26,48 +24,72 @@ class UPS {
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
 
+        this.model = this.getSNMP(this.oids.model);
+        this.serial_number = this.getSNMP(this.oids.serial_number);
+        this.firmware_rev = this.getSNMP(this.oids.firmware_rev);
 
-        for (const [key, oid] of Object.entries(this.oids.info)) {
-            this.session.get([oid], function (error, varbinds) {
-                if (error) {
-                    console.error(error);
-                } else {
-                    if (snmp.isVarbindError(varbinds[0])) {
-                        console.error(snmp.varbindError(varbinds[0]));
-                    } else {
-                        if (key === "model") {
-                            this.model = varbinds[0].value
-                        } else if (key === "serial_number") {
-                            this.serial_number = varbinds[0].value
-                        } else if (key === "firmware_rev") {
-                            this.firmware_rev = varbinds[0].value
-                        }
+        this.log("UPS Info:");
+        this.log("Model: " + this.model);
+        this.log("Serial Number: " + this.serial_number);
+        this.log("Firmware Rev.: " + this.firmware_rev);
 
-                        this.log("UPS Info:");
-                        this.log("Model: " + this.model);
-                        this.log("Serial Number: " + this.serial_number);
-                        this.log("Firmware Rev.: " + this.firmware_rev);
-
-                        this.informationService = new this.api.hap.Service.AccessoryInformation()
-                            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
-                            .setCharacteristic(this.api.hap.Characteristic.Model, this.model)
-                            .setCharacteristic(this.api.hap.Characteristic.Name, this.model)
-                            .setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.serial_number)
-                            .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.firmware_rev);
+        this.informationService = new this.api.hap.Service.AccessoryInformation()
+            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
+            .setCharacteristic(this.api.hap.Characteristic.Model, this.model)
+            .setCharacteristic(this.api.hap.Characteristic.Name, this.model)
+            .setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.serial_number)
+            .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.firmware_rev);
 
 
-                        this.switchService = new this.api.hap.Service.Switch(this.model);
+        this.switchService = new this.api.hap.Service.Switch(this.name);
 
-                        // link methods used when getting or setting the state of the service
-                        this.switchService.getCharacteristic(this.api.hap.Characteristic.On)
-                            .onGet(this.getOnHandler.bind(this))   // bind to getOnHandler method below
-                            .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
-                    }
-                }
-            });
-        }
+        // link methods used when getting or setting the state of the service
+        this.switchService.getCharacteristic(this.api.hap.Characteristic.On)
+            .onGet(this.getOnHandler.bind(this))   // bind to getOnHandler method below
+            .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
     }
 
+
+    async getSNMP(oid) {
+        let response = ""
+
+        this.wrapper = (oid) => {
+            return new Promise(
+                (resolve) => {
+                    this.session.get(oid, function (error, varbinds) {
+                        if (error) {
+                            response = {code: 1, message: error};
+                        }
+                        resolve(varbinds);
+                    })
+                })
+        };
+
+        await this.wrapper([oid]).then(
+            data => response = this.parseVarbinds(data)
+        ).catch(
+            error => {
+                console.log(error);
+                response = {code: 1, message: error};
+            }
+        );
+
+        return response;
+    }
+
+    parseVarbinds(varbinds) {
+        let value = "";
+        for (let i = 0; i < varbinds.length; i++) {
+            if (snmp.isVarbindError(varbinds[i])) {
+                console.log(snmp.varbindError(varbinds[i]));
+            } else {
+                console.log(varbinds[0].value);
+                value = varbinds[0].value;
+            }
+        }
+        this.session.close();
+        return value;
+    }
 
     setSnmp(oid, type, value) {
         this.session.set([{oid, type, value}], function (error, varbinds) {
