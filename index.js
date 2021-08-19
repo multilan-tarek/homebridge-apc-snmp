@@ -53,7 +53,7 @@ class UPS {
                             if (key === "model") {
                                 that.log("Model: " + varbinds[0].value.toString());
                                 that.log("Manufacturer: " + "APC")
-                                that.informationService.setCharacteristic(that.Characteristic.Model, varbinds[0].value.toString());
+                                that.informationService.addCharacteristic(that.Characteristic.Model, varbinds[0].value.toString());
                             } else if (key === "serial_number") {
                                 that.log("Serial Number: " + varbinds[0].value.toString());
                             } else if (key === "firmware_rev") {
