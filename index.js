@@ -19,7 +19,7 @@ class UPS {
         this.log = log;
         this.config = config;
         this.api = api;
-        this.session = snmp.createSession("10.0.30.3", "private");
+        this.session = snmp.createSession(this.config.address, this.config.community);
         this.oids = {
             "model": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
             "manufacturer": "APC",
@@ -35,7 +35,7 @@ class UPS {
 
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
-        this.name = config.name;
+        this.name = this.config.name;
 
         this.informationService = new this.Service.AccessoryInformation()
             .setCharacteristic(this.Characteristic.Manufacturer, "APC")
@@ -128,7 +128,6 @@ class UPS {
 
     async getLowBatteryHandler() {
         this.log.debug('Triggered GET getLowBatteryHandler');
-
         var that = this
         this.session.get([this.oids.bat_status], function (error, varbinds) {
             if (error) {
@@ -146,10 +145,13 @@ class UPS {
             return 0
         } else if (this.bat_status === 3) {
             return 1
+        } else {
+            return 0
         }
     }
 
     async getBatteryLevelHandler() {
+        this.bat_capacity = 0;
         this.log.debug('Triggered GET getBatteryLevelHandler');
         var that = this
         this.session.get([this.oids.bat_capacity], function (error, varbinds) {
@@ -163,7 +165,7 @@ class UPS {
                 }
             }
         });
-        return this.bat_capacity
+        return this.bat_capacity;
     }
 
     async getBatteryChargingStateHandler() {
