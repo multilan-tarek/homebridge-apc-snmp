@@ -51,6 +51,7 @@ class UPS {
                             console.error(snmp.varbindError(varbinds[0]));
                         } else {
                             if (key === "model") {
+                                that.model = varbinds[0].value.toString();
                                 that.log("Model: " + varbinds[0].value.toString());
                                 that.log("Manufacturer: " + "APC")
                                 that.informationService.setCharacteristic(that.api.hap.Characteristic.Model, varbinds[0].value.toString());
@@ -63,8 +64,9 @@ class UPS {
                     }
                 });
             }
+            console.log(this.model + "111")
         }
-
+        console.log(this.model)
         this.informationService.setCharacteristic(that.api.hap.Characteristic.Model, "smartups");
 
 
