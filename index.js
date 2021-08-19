@@ -153,7 +153,7 @@ class UPS {
         this.log.info('Triggered GET getBatteryLevelHandler');
 
         // set this to a valid value for StatusLowBattery
-        return this.Characteristic.BATTERY_LEVEL_LOW;
+        return 10
     }
 
 }
