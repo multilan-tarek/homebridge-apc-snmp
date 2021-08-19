@@ -1,5 +1,4 @@
 var snmp = require("net-snmp");
-var model = "scheisse"
 
 
 module.exports = (api) => {
@@ -24,27 +23,22 @@ class UPS {
 
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
-        this.informationService = new this.api.hap.Service.AccessoryInformation()
-            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
+        console.log(this.getSnmp(this.oids.model));
+        this.model = this.getSnmp(this.oids.model);
+        this.serial_number = this.getSnmp(this.oids.serial_number);
+        this.firmware_rev = this.getSnmp(this.oids.firmware_rev);
 
         this.log("UPS Info:");
-        this.getSnmpSync(this.oids.model).then(function (resolve) {
-            model = resolve;
-            this.log("Model: " + model);
-            this.informationService.setCharacteristic(this.api.hap.Characteristic.Model, model);
-            this.informationService.setCharacteristic(this.api.hap.Characteristic.Name, model);
-        });
-        //this.getSnmpSync(this.oids.serial_number).then(function (resolve) {
-        //    this.serial_number = resolve;
-        //    this.log("Serial Number: " + this.serial_number);
-        //    this.informationService.setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.serial_number);
-        //});
-        //this.getSnmpSync(this.oids.firmware_rev).then(function (resolve) {
-        //    this.firmware_rev = resolve;
-        //    this.log("Firmware Rev.: " + this.firmware_rev);
-        //    this.informationService.setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.firmware_rev);
-        //});
+        this.log("Model: " + this.model);
+        this.log("Serial Number: " + this.serial_number);
+        this.log("Firmware Rev.: " + this.firmware_rev);
 
+        this.informationService = new this.api.hap.Service.AccessoryInformation()
+            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
+            .setCharacteristic(this.api.hap.Characteristic.Model, this.model)
+            .setCharacteristic(this.api.hap.Characteristic.Name, this.model)
+            .setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.serial_number)
+            .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.firmware_rev);
 
 
         this.switchService = new this.api.hap.Service.Switch(this.name);
@@ -55,22 +49,25 @@ class UPS {
             .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
     }
 
-    getSnmpSync(oid) {
-        const session = this.session;
-        return new Promise(function executor(resolve, reject) {
-            session.get([oid], function (error, varbinds) {
-                if (error) {
-                    console.error(error);
+    getSnmp(oid) {
+        let value = ""
+        this.session.get([oid], function (error, varbinds) {
+            if (error) {
+                console.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
                 } else {
-                    if (snmp.isVarbindError(varbinds[0])) {
-                        console.error(snmp.varbindError(varbinds[0]));
-                    } else {
-                        console.log(varbinds[0].oid + "|" + varbinds[0].value);
-                        resolve(varbinds[0].value.toString())
-                    }
+                    console.log(varbinds[0].oid + "|" + varbinds[0].value);
+                    value = varbinds[0].value;
+
                 }
-            });
+            }
         });
+        while(value=="") {
+            // do nothing
+        }
+        return value;
     }
 
     setSnmp(oid, type, value) {
@@ -104,7 +101,9 @@ class UPS {
         this.log.info('Getting switch state');
 
         // get the current value of the switch in your own code
-        return false;
+        const value = false;
+
+        return value;
     }
 
     async setOnHandler(value) {
