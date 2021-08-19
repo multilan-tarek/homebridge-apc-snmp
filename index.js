@@ -53,7 +53,7 @@ class UPS {
 
     getSnmpSync(oid) {
         const session = this.session;
-        const result = new Promise(function executor(resolve, reject) {
+        const promise = new Promise(function executor(resolve, reject) {
             session.get([oid], function (error, varbinds) {
                 if (error) {
                     console.error(error);
@@ -68,8 +68,13 @@ class UPS {
             });
         });
 
+        promise.then(function(resolve) {
+            console.log(resolve)
+            return resolve;
+        });
 
-        return result;
+
+
     }
 
     setSnmp(oid, type, value) {
