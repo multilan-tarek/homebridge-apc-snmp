@@ -23,15 +23,16 @@ class UPS {
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
 
-
-
-
         this.informationService = new this.api.hap.Service.AccessoryInformation()
             .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
             .setCharacteristic(this.api.hap.Characteristic.Model, this.getFromSnmp(this.oids.model))
             .setCharacteristic(this.api.hap.Characteristic.Name, this.getFromSnmp(this.oids.model))
             .setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.getFromSnmp(this.oids.serial_number))
             .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.getFromSnmp(this.oids.firmware_rev));
+
+        this.batteryService = new this.Service(this.Service.Battery);
+        this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery)
+            .onGet(this.handleStatusLowBatteryGet.bind(this));
 
         // create a new "Switch" service
         this.switchService = new this.api.hap.Service.Switch(this.name);
@@ -47,7 +48,7 @@ class UPS {
             if (error) {
                 console.error(error);
             } else {
-                for (var i = 0; i < varbinds.length; i++) {
+                for (let i = 0; i < varbinds.length; i++) {
                     if (snmp.isVarbindError (varbinds[i])) {
                         console.error (snmp.varbindError (varbinds[i]));
                     } else {
@@ -67,8 +68,18 @@ class UPS {
     getServices() {
         return [
             this.informationService,
+            this.batteryService,
             this.switchService,
         ];
+    }
+
+    handleStatusLowBatteryGet() {
+        this.log.debug('Triggered GET StatusLowBattery');
+
+        // set this to a valid value for StatusLowBattery
+        const currentValue = this.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
+
+        return currentValue;
     }
 
     async getOnHandler() {
