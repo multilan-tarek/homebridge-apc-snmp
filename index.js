@@ -26,7 +26,7 @@ class UPS {
 
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
-        this.CommunityTypes = require('hap-nodejs-community-types')(homebridge)
+        this.CommunityTypes = require('hap-nodejs-community-types');
         this.name = config.name;
 
         this.informationService = new this.api.hap.Service.AccessoryInformation()
