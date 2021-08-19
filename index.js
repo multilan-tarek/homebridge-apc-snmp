@@ -14,6 +14,8 @@ class UPS {
         this.oids = {
             "model": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
             "manufacturer": "APC",
+            "serial_number": "1.3.6.1.4.1.318.1.1.1.1.2.3.0",
+            "firmware_rev": "1.3.6.1.4.1.318.1.1.1.1.2.1.0",
         };
 
         this.log.debug('APC SNMP UPS plugin loaded');
@@ -22,14 +24,14 @@ class UPS {
         this.Characteristic = this.api.hap.Characteristic;
 
 
-        this.getFromSnmp(this.oids.model)
+
 
         this.informationService = new this.api.hap.Service.AccessoryInformation()
             .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
-            .setCharacteristic(this.api.hap.Characteristic.Model, "Smart UPS 750 RM")
-            .setCharacteristic(this.api.hap.Characteristic.Name, "Smart UPS 750 RM")
-            .setCharacteristic(this.api.hap.Characteristic.SerialNumber, "Smart UPS 750 RM")
-            .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, "Smart UPS 750 RM");
+            .setCharacteristic(this.api.hap.Characteristic.Model, this.getFromSnmp(this.oids.model))
+            .setCharacteristic(this.api.hap.Characteristic.Name, this.getFromSnmp(this.oids.model))
+            .setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.getFromSnmp(this.oids.serial_number))
+            .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.getFromSnmp(this.oids.firmware_rev));
 
         // create a new "Switch" service
         this.switchService = new this.api.hap.Service.Switch(this.name);
@@ -41,19 +43,18 @@ class UPS {
     }
 
     getFromSnmp(oid) {
-        this.session.get([oid], function (error, varbinds) {
+        this.session.get(oid, function (error, varbinds) {
             if (error) {
                 console.error(error);
             } else {
-                for (let i = 0; i < varbinds.length; i++) {
-                    if (snmp.isVarbindError(varbinds[i])) {
-                        console.error(snmp.varbindError(varbinds[i]));
-                    } else {
-                        console.log(varbinds[i].oid + " = " + varbinds[i].value);
-                    }
+                if (snmp.isVarbindError(varbinds)) {
+                    console.error(snmp.varbindError(varbinds));
+                } else {
+                    return varbinds.value;
                 }
             }
         });
+        return "-"
     }
 
 
