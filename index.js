@@ -26,10 +26,11 @@ class UPS {
 
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
+        this.CommunityTypes = require('hap-nodejs-community-types')(homebridge)
         this.name = config.name;
 
         this.informationService = new this.api.hap.Service.AccessoryInformation()
-            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
+            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "American Power Conversion (APC)")
 
         var that = this
         this.log("UPS Info:");
@@ -63,76 +64,55 @@ class UPS {
         }
 
 
-        this.batteryService = new this.Service.BatteryService(this.name)
-        this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery)
-            .onGet(this.getLowBatteryHandler.bind(this))
-        this.batteryService.getCharacteristic(this.Characteristic.BatteryLevel)
-            .onGet(this.getBatteryLevelHandler.bind(this));
-        this.batteryService.getCharacteristic(this.Characteristic.ChargingState)
-            .onGet(this.getBatteryChargingStateHandler.bind(this));
+        //this.batteryService = new this.Service.BatteryService(this.name)
+        //this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery)
+        //    .onGet(this.getLowBatteryHandler.bind(this))
+        //this.batteryService.getCharacteristic(this.Characteristic.BatteryLevel)
+        //    .onGet(this.getBatteryLevelHandler.bind(this));
+        //this.batteryService.getCharacteristic(this.Characteristic.ChargingState)
+        //    .onGet(this.getBatteryChargingStateHandler.bind(this));
 
         this.switchService = new this.Service.Switch(this.name);
         this.switchService.getCharacteristic(this.Characteristic.On)
             .onGet(this.getPowerStateHandler.bind(this))
             .onSet(this.setPowerStateHandler.bind(this));
 
-        const PowerVolts = function () {
-            that.Characteristic.call(this, 'Volts', 'F208B4F8-51CF-49F1-A893-E94ED9636C54');
-            this.setProps({
-                format: that.Characteristic.Formats.UINT16,
-                unit: 'volts',
-                maxValue: 254,
-                minValue: 0,
-                minStep: 1,
-                perms: [that.Characteristic.Perms.READ, that.Characteristic.Perms.NOTIFY]
-            });
-            this.value = this.getDefaultValue();
-        };
-        inherits(PowerVolts, this.Characteristic);
+        const PowerService = function (displayName, subtype) {
+            that.Service.call(this, displayName, '00000001-0000-1000-8000-135D67EC4377', subtype)
+            this.addCharacteristic(that.CommunityTypes.InputVoltageAC)
+            //this.addCharacteristic(that.CommunityTypes.BatteryVoltageDC)
+            //this.addCharacteristic(that.CommunityTypes.UPSLoadPercent)
+            //this.addCharacteristic(that.CommunityTypes.Volts)
+            //this.addCharacteristic(that.CommunityTypes.VoltAmperes)
+            //this.addOptionalCharacteristic(that.CommunityTypes.Watts)
+            //this.addOptionalCharacteristic(that.CommunityTypes.KilowattHours)
+            //this.addOptionalCharacteristic(that.CommunityTypes.OutputVoltageAC)
+            //this.addOptionalCharacteristic(that.CommunityTypes.OutputVoltAmperes)
+            //this.addOptionalCharacteristic(that.Characteristic.CurrentTemperature)
+            //this.addCharacteristic(that.CommunityTypes.EveResetTotal)
+        }
+        inherits(PowerService, this.Service)
 
-        const PowerAmps = function () {
-            that.Characteristic.call(this, 'Amps', 'E99525EC-E068-408F-9F6F-75BC4141F520');
-            this.setProps({
-                format: that.Characteristic.Formats.FLOAT,
-                unit: 'amps',
-                maxValue: 1000,
-                minValue: 0,
-                minStep: 0.1,
-                perms: [that.Characteristic.Perms.READ, that.Characteristic.Perms.NOTIFY]
-            });
-            this.value = this.getDefaultValue();
-        };
-        inherits(PowerAmps, this.Characteristic);
-
-        const PowerWatts = function () {
-            that.Characteristic.call(this, 'Watts', 'EAF81118-0168-4B42-BC90-3DA56902DC5B');
-            this.setProps({
-                format: that.Characteristic.Formats.UINT16,
-                unit: 'watts',
-                maxValue: 10000,
-                minValue: 0,
-                minStep: 1,
-                perms: [that.Characteristic.Perms.READ, that.Characteristic.Perms.NOTIFY]
-            });
-            this.value = this.getDefaultValue();
-        };
-        inherits(PowerWatts, this.Characteristic);
-
-        const PowerMeterService = function (displayName, subtype) {
-            that.Service.call(this, displayName, '00000001-0000-1777-8000-775D67EC4377', subtype);
-            //this.addCharacteristic(PowerVolts);
-            //this.addCharacteristic(PowerAmps);
-            this.addCharacteristic(PowerWatts);
-        };
-        inherits(PowerMeterService, this.Service);
-
-        this.powerService = new PowerMeterService(this.name);
-        this.powerService.getCharacteristic(PowerVolts)
-            //.onGet(this.getPowerVolts.bind(this))
-            //.onGet(this.getPowerAmps.bind(this))
-            .onGet(this.getPowerWatts.bind(this));
-
-
+        this.powerService = new PowerService()
+        this.powerService
+            .getCharacteristic(this.CommunityTypes.InputVoltageAC)
+            .on('get', this.getInputVoltageHandler.bind(this))
+        //this.powerService
+        //    .getCharacteristic(CommunityTypes.BatteryVoltageDC)
+        //    .on('get', this.getBatteryVoltageDC.bind(this))
+        //this.powerService
+        //    .getCharacteristic(CommunityTypes.UPSLoadPercent)
+        //    .on('get', this.getUPSLoadPercent.bind(this))
+        //this.powerService
+        //    .getCharacteristic(CommunityTypes.Volts)
+        //    .on('get', this.getVolts.bind(this))
+        //this.powerService
+        //    .getCharacteristic(CommunityTypes.VoltAmperes)
+        //    .on('get', this.getVoltAmperes.bind(this))
+        //this.powerService
+        //    .getCharacteristic(CommunityTypes.EveResetTotal)
+        //    .on('get', this.getEveResetTotal.bind(this))
+        //    .on('set', this.setEveResetTotal.bind(this))
     }
 
     setSnmp(oid, type, value) {
@@ -158,7 +138,7 @@ class UPS {
     getServices() {
         return [
             this.informationService,
-            this.batteryService,
+            //this.batteryService,
             this.switchService,
             this.powerService
         ];
@@ -247,55 +227,8 @@ class UPS {
         return 2
     }
 
-    async getPowerVolts() {
-        this.log.info('Triggered GET getPowerVolts');
-        //var that = this
-        //this.session.get([this.oids.bat_capacity], function (error, varbinds) {
-        //    if (error) {
-        //        console.error(error);
-        //    } else {
-        //        if (snmp.isVarbindError(varbinds[0])) {
-        //            console.error(snmp.varbindError(varbinds[0]));
-        //        } else {
-        //            that.bat_capacity = varbinds[0].value.toString();
-        //        }
-        //    }
-        //});
-        return 230
+    async getInputVoltageHandler() {
+        this.log.info('Triggered GET getInputVoltageHandler');
+        return 230;
     }
-
-    async getPowerAmps() {
-        this.log.info('Triggered GET getPowerAmps');
-        //var that = this
-        //this.session.get([this.oids.bat_capacity], function (error, varbinds) {
-        //    if (error) {
-        //        console.error(error);
-        //    } else {
-        //        if (snmp.isVarbindError(varbinds[0])) {
-        //            console.error(snmp.varbindError(varbinds[0]));
-        //        } else {
-        //            that.bat_capacity = varbinds[0].value.toString();
-        //        }
-        //    }
-        //});
-        return 230
-    }
-
-    async getPowerWatts() {
-        this.log.info('Triggered GET getPowerWatts');
-        //var that = this
-        //this.session.get([this.oids.bat_capacity], function (error, varbinds) {
-        //    if (error) {
-        //        console.error(error);
-        //    } else {
-        //        if (snmp.isVarbindError(varbinds[0])) {
-        //            console.error(snmp.varbindError(varbinds[0]));
-        //        } else {
-        //            that.bat_capacity = varbinds[0].value.toString();
-        //        }
-        //    }
-        //});
-        return 230
-    }
-
 }
