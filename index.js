@@ -107,20 +107,13 @@ class UPS {
                         if (snmp.isVarbindError(varbinds[0])) {
                             console.error(snmp.varbindError(varbinds[0]));
                         } else {
-                            if (key === "model") {
-                                that.model = varbinds[0].value.toString();
-                                that.informationService.setCharacteristic(that.api.hap.Characteristic.Model, varbinds[0].value.toString());
-                            } else if (key === "serial_number") {
-                                that.informationService.setCharacteristic(that.api.hap.Characteristic.SerialNumber, varbinds[0].value.toString());
-                            } else if (key === "firmware_rev") {
-                                that.informationService.setCharacteristic(that.api.hap.Characteristic.FirmwareRevision, varbinds[0].value.toString());
-                            }
+                            that.value = varbinds[0].value.toString();
                         }
                     }
                 });
             }
         }
-        console.log(this.model)
+        console.log(this.value)
     }
 
     async getPowerStateHandler() {
