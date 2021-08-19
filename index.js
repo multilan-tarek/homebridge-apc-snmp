@@ -50,8 +50,8 @@ class UPS {
     }
 
     getSNMP(oid) {
-
-        return new Promise(value => {
+        let value = ""
+        const promise =  new Promise(value => {
             this.session.get([oid], function (error, varbinds) {
                 if (error) {
                     console.error(error);
@@ -64,8 +64,12 @@ class UPS {
                     }
                 }
             });
+        })
+        promise.then((value_) => {
+            console.log(value_);
+            value = value_;
         });
-
+        return value;
     }
 
 
