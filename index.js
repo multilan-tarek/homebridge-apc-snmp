@@ -10,31 +10,37 @@ class UPS {
         this.log = log;
         this.config = config;
         this.api = api;
-        this.session = snmp.createSession("10.0.30.3", "public");
+        this.session = snmp.createSession("10.0.30.3", "private");
         this.oids = {
             "model": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
             "manufacturer": "APC",
             "serial_number": "1.3.6.1.4.1.318.1.1.1.1.2.3.0",
             "firmware_rev": "1.3.6.1.4.1.318.1.1.1.1.2.1.0",
+            "turn_on": {"oid": "", "type": snmp.ObjectType.INTEGER, "value": 2},
+            "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.6.0", "type": snmp.ObjectType.INTEGER, "value": 2}
         };
 
-        this.log.debug('APC SNMP UPS plugin loaded');
 
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
 
+        this.model = this.getSnmp(this.oids.model);
+        this.serial_number = this.getSnmp(this.oids.serial_number);
+        this.firmware_rev = this.getSnmp(this.oids.firmware_rev);
+
+        this.log("UPS Info:");
+        this.log("Model: " + this.model);
+        this.log("Serial Number: " + this.serial_number);
+        this.log("Firmware Rev.: " + this.firmware_rev);
+
         this.informationService = new this.api.hap.Service.AccessoryInformation()
             .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
-            .setCharacteristic(this.api.hap.Characteristic.Model, this.getFromSnmp(this.oids.model))
-            .setCharacteristic(this.api.hap.Characteristic.Name, this.getFromSnmp(this.oids.model))
-            .setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.getFromSnmp(this.oids.serial_number))
-            .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.getFromSnmp(this.oids.firmware_rev));
+            .setCharacteristic(this.api.hap.Characteristic.Model, this.model)
+            .setCharacteristic(this.api.hap.Characteristic.Name, this.model)
+            .setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.serial_number)
+            .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.firmware_rev);
 
-        this.batteryService = new this.Service(this.Service.Battery);
-        this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery)
-            .onGet(this.handleStatusLowBatteryGet.bind(this));
 
-        // create a new "Switch" service
         this.switchService = new this.api.hap.Service.Switch(this.name);
 
         // link methods used when getting or setting the state of the service
@@ -43,7 +49,7 @@ class UPS {
             .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
     }
 
-    getFromSnmp(oid) {
+    getSnmp(oid) {
         this.session.get([oid], function (error, varbinds) {
             if (error) {
                 console.error(error);
@@ -60,6 +66,24 @@ class UPS {
         return "-"
     }
 
+    setSnmp(oid, type, value) {
+        this.session.set ([{oid, type, value}], function (error, varbinds) {
+            if (error) {
+                console.error (error.toString ());
+            } else {
+                for (let i = 0; i < varbinds.length; i++) {
+                    console.log (varbinds[i].oid + "|" + varbinds[i].value);
+
+                    if (snmp.isVarbindError (varbinds[i]))
+                        console.error (snmp.varbindError (varbinds[i]));
+                    else
+                        console.log (varbinds[i].oid + "|" + varbinds[i].value);
+                }
+            }
+        });
+        return "-"
+    }
+
 
     /**
      * REQUIRED - This must return an array of the services you want to expose.
@@ -68,18 +92,8 @@ class UPS {
     getServices() {
         return [
             this.informationService,
-            this.batteryService,
             this.switchService,
         ];
-    }
-
-    handleStatusLowBatteryGet() {
-        this.log.debug('Triggered GET StatusLowBattery');
-
-        // set this to a valid value for StatusLowBattery
-        const currentValue = this.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
-
-        return currentValue;
     }
 
     async getOnHandler() {
@@ -92,7 +106,11 @@ class UPS {
     }
 
     async setOnHandler(value) {
-        this.log.info('Setting switch state to:', value);
+        if (value === true) {
+            this.setSnmp(this.oids.turn_on.oid, this.oids.turn_on.type, this.oids.turn_on.value);
+        } else {
+            this.setSnmp(this.oids.turn_off.oid, this.oids.turn_off.type, this.oids.turn_off.value);
+        }
     }
 
 
