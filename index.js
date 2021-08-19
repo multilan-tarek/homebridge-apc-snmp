@@ -43,16 +43,16 @@ class UPS {
                             if (key === "model") {
                                 that.model = varbinds[0].value.toString();
                                 that.log("Model: " + that.model);
-                                that.informationService.setCharacteristic(that.Characteristic.Model, that.model);
-                                that.informationService.setCharacteristic(that.Characteristic.Name, that.model);
+                                //that.informationService.setCharacteristic(that.Characteristic.Model, that.model);
+                                //that.informationService.setCharacteristic(that.Characteristic.Name, that.model);
                             } else if (key === "serial_number") {
                                 that.serial_number = varbinds[0].value.toString();
                                 that.log("Serial Number: " + that.serial_number);
-                                that.informationService.setCharacteristic(that.Characteristic.SerialNumber, that.serial_number);
+                                //that.informationService.setCharacteristic(that.Characteristic.SerialNumber, that.serial_number);
                             } else if (key === "firmware_rev") {
                                 that.firmware_rev = varbinds[0].value.toString();
                                 that.log("Firmware Rev.: " + that.firmware_rev);
-                                that.informationService.setCharacteristic(that.Characteristic.FirmwareRevision, that.firmware_rev);
+                                //that.informationService.setCharacteristic(that.Characteristic.FirmwareRevision, that.firmware_rev);
                             }
                         }
                     }
