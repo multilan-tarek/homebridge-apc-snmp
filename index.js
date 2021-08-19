@@ -210,35 +210,39 @@ class UPS {
     async getSerialNumberHandler() {
         this.log.debug('Triggered GET getSerialNumberHandler');
         var that = this
-        this.session.get([this.oids.serial_number], function (error, varbinds) {
-            if (error) {
-                console.error(error);
-            } else {
-                if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
+        return await new Promise(function (resolve, reject) {
+            that.session.get([that.oids.serial_number], function (error, varbinds) {
+                if (error) {
+                    console.error(error);
                 } else {
-                    that.serial_number_ = varbinds[0].value.toString();
+                    if (snmp.isVarbindError(varbinds[0])) {
+                        console.error(snmp.varbindError(varbinds[0]));
+                    } else {
+                        var value = varbinds[0].value.toString()
+                        resolve(value)
+                    }
                 }
-            }
+            });
         });
-        return this.serial_number_;
     }
 
     async getFirmwareRevHandler() {
         this.log.debug('Triggered GET getFirmwareRevHandler');
         var that = this
-        this.session.get([this.oids.firmware_rev], function (error, varbinds) {
-            if (error) {
-                console.error(error);
-            } else {
-                if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
+        return await new Promise(function (resolve, reject) {
+            that.session.get([that.oids.firmware_rev], function (error, varbinds) {
+                if (error) {
+                    console.error(error);
                 } else {
-                    that.firmware_rev_ = varbinds[0].value.toString();
+                    if (snmp.isVarbindError(varbinds[0])) {
+                        console.error(snmp.varbindError(varbinds[0]));
+                    } else {
+                        var value = varbinds[0].value.toString()
+                        resolve(value)
+                    }
                 }
-            }
+            });
         });
-        return this.firmware_rev_;
     }
 
 }
