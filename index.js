@@ -59,6 +59,7 @@ class UPS {
                 } else {
                     console.log(varbinds[0].oid + "|" + varbinds[0].value);
                     snmp_value = varbinds[0].value;
+                    console.log(varbinds[0].value)
                     console.log(snmp_value)
                 }
             }
@@ -100,9 +101,7 @@ class UPS {
         this.log.info('Getting switch state');
 
         // get the current value of the switch in your own code
-        const value = false;
-
-        return value;
+        return false;
     }
 
     async setOnHandler(value) {
