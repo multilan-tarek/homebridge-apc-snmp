@@ -39,8 +39,7 @@ class UPS {
 
         this.informationService = new this.Service.AccessoryInformation()
             .setCharacteristic(this.Characteristic.Manufacturer, "APC")
-        this.informationService = new this.Service.AccessoryInformation()
-            .getCharacteristic(this.Characteristic.Model)
+        this.informationService.getCharacteristic(this.Characteristic.Model)
             .onGet(this.updateAccessoryInformation.bind(this))
 
         var that = this
