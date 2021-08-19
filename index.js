@@ -87,7 +87,7 @@ class UPS {
             .onGet(this.getPowerStateHandler.bind(this))
             .onSet(this.setPowerStateHandler.bind(this));
 
-        this.alarmSwitchService = new this.Service.Switch(this.name + " Alarm");
+        this.alarmSwitchService = new this.Service.Switch(this.name + " Alarm", "Alarm");
         this.alarmSwitchService.getCharacteristic(this.Characteristic.On)
             .onGet(this.getAlarmStateHandler.bind(this))
             .onSet(this.setAlarmStateHandler.bind(this));
