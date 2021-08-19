@@ -120,16 +120,16 @@ class UPS {
 
         const PowerMeterService = function (displayName, subtype) {
             that.Service.call(this, displayName, '00000001-0000-1777-8000-775D67EC4377', subtype);
-            this.addCharacteristic(PowerVolts);
-            this.addCharacteristic(PowerAmps);
+            //this.addCharacteristic(PowerVolts);
+            //this.addCharacteristic(PowerAmps);
             this.addCharacteristic(PowerWatts);
         };
         inherits(PowerMeterService, this.Service);
 
         this.powerService = new PowerMeterService(this.name);
         this.powerService.getCharacteristic(PowerVolts)
-            .onGet(this.getPowerVolts.bind(this))
-            .onGet(this.getPowerAmps.bind(this))
+            //.onGet(this.getPowerVolts.bind(this))
+            //.onGet(this.getPowerAmps.bind(this))
             .onGet(this.getPowerWatts.bind(this));
 
 
