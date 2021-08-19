@@ -113,7 +113,7 @@ class UPS {
                 }
             }
         });
-        return this.model;
+        return "sdda";
     }
 
     async getSerialNumberHandler() {
