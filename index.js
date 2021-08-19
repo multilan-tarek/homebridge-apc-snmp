@@ -53,7 +53,6 @@ class UPS {
                     }
                 }
             }
-            this.close();
         });
     }
 
