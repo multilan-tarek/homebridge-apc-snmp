@@ -20,25 +20,48 @@ class UPS {
             "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 2}
         };
 
-
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
-        console.log(this.getSnmp(this.oids.model));
-        this.model = this.getSnmp(this.oids.model);
-        this.serial_number = this.getSnmp(this.oids.serial_number);
-        this.firmware_rev = this.getSnmp(this.oids.firmware_rev);
 
-        this.log("UPS Info:");
-        this.log("Model: " + this.model);
-        this.log("Serial Number: " + this.serial_number);
-        this.log("Firmware Rev.: " + this.firmware_rev);
+
 
         this.informationService = new this.api.hap.Service.AccessoryInformation()
             .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
-            .setCharacteristic(this.api.hap.Characteristic.Model, this.model)
-            .setCharacteristic(this.api.hap.Characteristic.Name, this.model)
-            .setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.serial_number)
-            .setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.firmware_rev);
+
+
+        var that = this
+        this.log("UPS Info:");
+        for (const [key, value] of Object.entries(this.oids)) {
+            if (key === "model" || key === "serial_number" || key === "firmware_rev") {
+                this.session.get([oid], function (error, varbinds) {
+                    if (error) {
+                        console.error(error);
+                    } else {
+                        if (snmp.isVarbindError(varbinds[0])) {
+                            console.error(snmp.varbindError(varbinds[0]));
+                        } else {
+                            if (key === "model") {
+                                that.model = varbinds[0].value.toString();
+                                that.log("Model: " + that.model);
+                                that.informationService.setCharacteristic(this.api.hap.Characteristic.Model, this.model);
+                                that.informationService.setCharacteristic(this.api.hap.Characteristic.Name, this.model);
+                            } else if (key === "serial_number") {
+                                that.serial_number = varbinds[0].value.toString();
+                                that.log("Serial Number: " + that.serial_number);
+                                that.informationService.setCharacteristic(this.api.hap.Characteristic.SerialNumber, this.serial_number);
+                            } else if (key === "firmware_rev") {
+                                that.firmware_rev = varbinds[0].value.toString();
+                                that.log("Firmware Rev.: " + that.firmware_rev);
+                                that.informationService.setCharacteristic(this.api.hap.Characteristic.FirmwareRevision, this.firmware_rev);
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+
+
 
 
         this.switchService = new this.api.hap.Service.Switch(this.name);
@@ -60,13 +83,9 @@ class UPS {
                 } else {
                     console.log(varbinds[0].oid + "|" + varbinds[0].value);
                     value = varbinds[0].value;
-
                 }
             }
         });
-        while (value === "") {
-            console.log(value)
-        }
         return value;
     }
 
