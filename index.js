@@ -127,10 +127,10 @@ class UPS {
         inherits(PowerMeterService, this.Service);
 
         this.powerService = new PowerMeterService(this.name);
-        this.powerService
-            .getCharacteristic(PowerVolts).onGet(this.getPowerVolts.bind(this))
-            .getCharacteristic(PowerAmps).onGet(this.getPowerAmps.bind(this))
-            .getCharacteristic(PowerWatts).onGet(this.getPowerWatts.bind(this));
+        this.powerService.getCharacteristic(PowerVolts)
+            .onGet(this.getPowerVolts.bind(this))
+            .onGet(this.getPowerAmps.bind(this))
+            .onGet(this.getPowerWatts.bind(this));
 
 
     }
