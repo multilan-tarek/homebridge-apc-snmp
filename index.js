@@ -11,7 +11,6 @@ class UPS {
         this.config = config;
         this.api = api;
         this.session = snmp.createSession("10.0.30.3", "private");
-        this.name = config.name;
         this.oids = {
             "model": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
             "manufacturer": "APC",
@@ -24,12 +23,10 @@ class UPS {
 
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
-
-
+        this.name = config.name;
 
         this.informationService = new this.api.hap.Service.AccessoryInformation()
             .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
-
 
         var that = this
         this.log("UPS Info:");
@@ -61,8 +58,14 @@ class UPS {
                 });
             }
         }
-        this.switchService =  new this.Service(this.Service.Switch);
-        this.switchService.getCharacteristic(this.Characteristic.On)
+
+
+
+
+
+        this.switchService = new this.Service.Switch(this.name);
+
+        this.switchService.getCharacteristic(this.api.hap.Characteristic.On)
             .onGet(this.getPowerStateHandler.bind(this))
             .onSet(this.setPowerStateHandler.bind(this));
     }
