@@ -99,56 +99,6 @@ class UPS {
         });
     }
 
-    async getModelHandler() {
-        this.log.debug('Triggered GET getModelHandler');
-        var that = this
-        this.session.get([this.oids.model], function (error, varbinds) {
-            if (error) {
-                console.error(error);
-            } else {
-                if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
-                } else {
-                    that.model = varbinds[0].value;
-                }
-            }
-        });
-        return "sdda";
-    }
-
-    async getSerialNumberHandler() {
-        this.log.debug('Triggered GET getSerialNumberHandler');
-        var that = this
-        this.session.get([this.oids.serial_number], function (error, varbinds) {
-            if (error) {
-                console.error(error);
-            } else {
-                if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
-                } else {
-                    that.serial_number = varbinds[0].value;
-                }
-            }
-        });
-        return this.serial_number;
-    }
-
-    async getFirmwareRevHandler() {
-        this.log.debug('Triggered GET getFirmwareRevHandler');
-        var that = this
-        this.session.get([this.oids.firmware_rev], function (error, varbinds) {
-            if (error) {
-                console.error(error);
-            } else {
-                if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
-                } else {
-                    that.firmware_rev = varbinds[0].value;
-                }
-            }
-        });
-        return this.firmware_rev;
-    }
 
     async getPowerStateHandler() {
         this.log.debug('Triggered GET getPowerStateHandler');
@@ -237,4 +187,56 @@ class UPS {
             return 0;
         }
     }
+
+    async getModelHandler() {
+        this.log.debug('Triggered GET getModelHandler');
+        var that = this
+        this.session.get([this.oids.model], function (error, varbinds) {
+            if (error) {
+                console.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    that.model_ = varbinds[0].value.toString();
+                }
+            }
+        });
+        return this.model_;
+    }
+
+    async getSerialNumberHandler() {
+        this.log.debug('Triggered GET getSerialNumberHandler');
+        var that = this
+        this.session.get([this.oids.serial_number], function (error, varbinds) {
+            if (error) {
+                console.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    that.serial_number_ = varbinds[0].value.toString();
+                }
+            }
+        });
+        return this.serial_number_;
+    }
+
+    async getFirmwareRevHandler() {
+        this.log.debug('Triggered GET getFirmwareRevHandler');
+        var that = this
+        this.session.get([this.oids.firmware_rev], function (error, varbinds) {
+            if (error) {
+                console.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    that.firmware_rev_ = varbinds[0].value.toString();
+                }
+            }
+        });
+        return this.firmware_rev_;
+    }
+
 }
