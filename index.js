@@ -92,7 +92,7 @@ class UPS {
             .onGet(this.getAlarmStateHandler.bind(this))
             .onSet(this.setAlarmStateHandler.bind(this));
 
-        this.service = new this.Service.StatefulProgrammableSwitch(this.name);
+        this.service = new this.Service.StatelessProgrammableSwitch(this.name);
 
         // create handlers for required characteristics
         this.service.getCharacteristic(this.Characteristic.ProgrammableSwitchEvent)
