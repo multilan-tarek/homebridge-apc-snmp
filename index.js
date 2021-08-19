@@ -12,9 +12,9 @@ class UPS {
         this.api = api;
         this.session = snmp.createSession("10.0.30.3", "private");
         this.oids = {
-            "model": "1.3.6.1.4.1.318.1.1.1.1",
-            "manufacturer": "1.3.6.1.4.1.318.1.1.1.1",
-            "serial_number": "1.3.6.1.4.1.318.1.1.1.1",
+            "model": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
+            "manufacturer": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
+            "serial_number": "1.3.6.1.4.1.318.1.1.1.1.2.3.0",
             "firmware_rev": "1.3.6.1.4.1.318.1.1.1.1.2.1.0",
             "turn_on": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.6.0", "type": snmp.ObjectType.INTEGER, "value": 2},
             "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 2}
