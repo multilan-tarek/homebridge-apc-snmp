@@ -64,7 +64,7 @@ class UPS {
                 }
             }
         });
-        while(value=="") {
+        while (value === "") {
             // do nothing
         }
         return value;
