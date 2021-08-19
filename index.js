@@ -39,7 +39,7 @@ class UPS {
 
         this.informationService = new this.api.hap.Service.AccessoryInformation()
             .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
-            .setCharacteristic(that.api.hap.Characteristic.Manufacturer, "test");
+            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "test");
 
         var that = this
         for (const [key, value] of Object.entries(this.oids)) {
