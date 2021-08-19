@@ -49,47 +49,23 @@ class UPS {
             .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
     }
 
-
     async getSNMP(oid) {
-        let response = ""
-
-        this.wrapper = (oid) => {
-            return new Promise(
-                (resolve) => {
-                    this.session.get(oid, function (error, varbinds) {
-                        if (error) {
-                            response = {code: 1, message: error};
-                        }
-                        resolve(varbinds);
-                    })
-                })
+        return await function (oid) {
+            this.session.get([oid], function (error, varbinds) {
+                if (error) {
+                    console.error(error);
+                } else {
+                    if (snmp.isVarbindError(varbinds[0])) {
+                        console.error(snmp.varbindError(varbinds[0]));
+                    } else {
+                        console.log(varbinds[0].oid + " = " + varbinds[0].value);
+                        return varbinds[0].value
+                    }
+                }
+            });
         };
-
-        await this.wrapper([oid]).then(
-            data => response = this.parseVarbinds(data)
-        ).catch(
-            error => {
-                console.log(error);
-                response = {code: 1, message: error};
-            }
-        );
-
-        return response;
     }
 
-    parseVarbinds(varbinds) {
-        let value = "";
-        for (let i = 0; i < varbinds.length; i++) {
-            if (snmp.isVarbindError(varbinds[i])) {
-                console.log(snmp.varbindError(varbinds[i]));
-            } else {
-                console.log(varbinds[0].value);
-                value = varbinds[0].value;
-            }
-        }
-        this.session.close();
-        return value;
-    }
 
     setSnmp(oid, type, value) {
         this.session.set([{oid, type, value}], function (error, varbinds) {
