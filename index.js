@@ -144,7 +144,8 @@ class UPS {
     async getLowBatteryHandler() {
         this.log.debug('Triggered GET StatusLowBattery');
 
-        // set this to a valid value for StatusLowBattery
+        // set this to a valid value for StatusLowBatter
+        console.log(this.Characteristic.BATTERY_LEVEL_LOW)
         return this.Characteristic.BATTERY_LEVEL_LOW;
     }
 
