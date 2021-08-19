@@ -52,8 +52,9 @@ class UPS {
     }
 
     getSnmpSync(oid) {
+        const session = this.session;
         const result = new Promise(function executor(resolve, reject) {
-            this.session.get([oid], function (error, varbinds) {
+            session.get([oid], function (error, varbinds) {
                 if (error) {
                     console.error(error);
                 } else {
@@ -61,11 +62,7 @@ class UPS {
                         console.error(snmp.varbindError(varbinds[0]));
                     } else {
                         console.log(varbinds[0].oid + "|" + varbinds[0].value);
-                        console.log(z)
-                        console.log(varbinds[0].value.toString())
-                        z = varbinds[0].value.toString();
-                        console.log(z)
-                        resolve(z)
+                        resolve(varbinds[0].value.toString())
                     }
                 }
             });
