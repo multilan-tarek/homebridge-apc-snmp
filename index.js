@@ -64,8 +64,9 @@ class UPS {
                     console.log(snmp_value + "1")
                 }
             }
+            console.log(snmp_value + "2")
+            return snmp_value;
         });
-        console.log(snmp_value + "2")
         return snmp_value;
     }
 
