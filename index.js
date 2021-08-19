@@ -12,7 +12,8 @@ class UPS {
             this.batteryService,
             this.switchService,
             this.alarmSwitchService,
-            this.gracefulSwitchService
+            this.gracefulSwitchService,
+            this.selftestSwitchService
         ];
     }
 
@@ -31,11 +32,13 @@ class UPS {
             "bat_status": "1.3.6.1.4.1.318.1.1.1.2.1.1.0",
             "time_on_bat": "1.3.6.1.4.1.318.1.1.1.2.1.2.0",
             "alarm_state": "1.3.6.1.4.1.318.1.1.1.5.2.4.0",
+            "selftest_state": "1.3.6.1.4.1.318.1.1.1.7.2.3.0",
             "turn_on": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.6.0", "type": snmp.ObjectType.INTEGER, "value": 2},
             "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 2},
             "turn_off_graceful": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 3},
             "alarm_on": {"oid": "1.3.6.1.4.1.318.1.1.1.5.2.4.0", "type": snmp.ObjectType.INTEGER, "value": 1},
-            "alarm_off": {"oid": "1.3.6.1.4.1.318.1.1.1.5.2.4.0", "type": snmp.ObjectType.INTEGER, "value": 3}
+            "alarm_off": {"oid": "1.3.6.1.4.1.318.1.1.1.5.2.4.0", "type": snmp.ObjectType.INTEGER, "value": 3},
+            "start_selftest": {"oid": "1.3.6.1.4.1.318.1.1.1.7.2.2.0", "type": snmp.ObjectType.INTEGER, "value": 2}
         };
 
         this.Service = this.api.hap.Service;
@@ -98,6 +101,11 @@ class UPS {
             .onGet(this.getAlarmStateHandler.bind(this))
             .onSet(this.setAlarmStateHandler.bind(this));
 
+        this.selftestSwitchService = new this.Service.Switch(this.name + " Selftest", "Selftest");
+        this.selftestSwitchService.getCharacteristic(this.Characteristic.On)
+            .onGet(this.getSelftestHandler.bind(this))
+            .onSet(this.setSelftestHandler.bind(this));
+
     }
 
     setSnmp(oid, type, value) {
@@ -114,6 +122,30 @@ class UPS {
                 }
             }
         });
+    }
+
+    async getSelftestHandler() {
+        this.log.debug('Triggered GET getSelftestHandler');
+        var that = this
+        this.session.get([this.oids.selftest_state], function (error, varbinds) {
+            if (error) {
+                that.log.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    that.log.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    that.selftest_state = varbinds[0].value.toString();
+                }
+            }
+        });
+        return this.selftest_state > 3;
+    }
+
+    async setSelftestHandler(value) {
+        this.log.debug('Triggered SET setSelftestHandler');
+        if (value === true) {
+            this.setSnmp(this.oids.start_selftest.oid, this.oids.start_selftest.type, this.oids.start_selftest.value);
+        }
     }
 
     async getPowerStateHandler() {
