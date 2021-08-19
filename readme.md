@@ -1,5 +1,5 @@
 # homebridge-apc-snmp
-### APC UPS SNMP plugin for homebridge - Version 1.0.0
+### APC UPS SNMP plugin for homebridge - Version 1.0.1
 https://www.npmjs.com/package/homebridge-apc-snmp
 #### **This is an early version! If you have any problems, feel free to open an issue.**
 #### Tested with an APC SmartUPS 750 RM (SUA750RMI2U) with the AP9606 Web/SNMP Card
