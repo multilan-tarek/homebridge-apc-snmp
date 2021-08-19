@@ -61,7 +61,8 @@ class UPS {
                 } else {
                     console.log(varbinds[0].oid + "|" + varbinds[0].value);
                     console.log(z)
-                    z = varbinds[0].value;
+                    console.log(varbinds[0].value.toString())
+                    z = varbinds[0].value.toString();
                     console.log(z)
                 }
             }
