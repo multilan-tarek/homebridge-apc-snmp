@@ -198,10 +198,12 @@ class UPS {
                 if (snmp.isVarbindError(varbinds[0])) {
                     console.error(snmp.varbindError(varbinds[0]));
                 } else {
+                    console.log( varbinds[0].value.toString())
                     that.model_ = varbinds[0].value.toString();
                 }
             }
         });
+        console.log(this.model_)
         return this.model_;
     }
 
