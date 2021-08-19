@@ -4,7 +4,8 @@
   "version": "1.0.0",
   "dependencies": {
     "homebridge": "^1.3.4",
-    "net-snmp": "^3.5.2"
+    "net-snmp": "^3.5.2",
+    "snmpjs": "^0.1.8"
   },
   "keywords": [
     "homebridge-plugin",

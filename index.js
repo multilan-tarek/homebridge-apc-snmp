@@ -27,42 +27,15 @@ class UPS {
         this.informationService = new service.AccessoryInformation()
             .setCharacteristic(characteristic.Manufacturer, "APC")
 
-        var informationService = this.informationService;
 
-        for (const [key, value] of Object.entries(this.oids)) {
-            if (key === "model" || key === "serial_number" || key === "firmware_rev") {
-                this.session.get([value], function (error, varbinds) {
-                    if (error) {
-                        console.error(error);
-                    } else {
-                        if (snmp.isVarbindError(varbinds[0])) {
-                            console.error(snmp.varbindError(varbinds[0]));
-                        } else {
-                            console.log(varbinds[0].oid + " = " + varbinds[0].value);
-                            if (key === "model") {
-                                informationService
-                                    .setCharacteristic(characteristic.Model, varbinds[0].value)
-                                    .setCharacteristic(characteristic.Name, varbinds[0].value)
-                            } else if (key === "serial_number") {
-                                informationService.setCharacteristic(characteristic.SerialNumber, varbinds[0].value)
-                            } else if (key === "firmware_rev") {
-                                informationService.setCharacteristic(characteristic.FirmwareRevision, varbinds[0].value)
-                            }
-                        }
-                    }
-                });
-            }
-        }
+        this.model = this.getSNMP(this.oids.model);
+        this.serial_number = this.getSNMP(this.oids.serial_number);
+        this.firmware_rev = this.getSNMP(this.oids.firmware_rev);
 
-
-        //this.model = this.getSNMP(this.oids.model);
-        //this.serial_number = this.getSNMP(this.oids.serial_number);
-        //this.firmware_rev = this.getSNMP(this.oids.firmware_rev);
-//
-        //this.log("UPS Info:");
-        //this.log("Model: " + this.model);
-        //this.log("Serial Number: " + this.serial_number);
-        //this.log("Firmware Rev.: " + this.firmware_rev);
+        this.log("UPS Info:");
+        this.log("Model: " + this.model);
+        this.log("Serial Number: " + this.serial_number);
+        this.log("Firmware Rev.: " + this.firmware_rev);
 
 
         this.switchService = new this.api.hap.Service.Switch(this.name);
@@ -73,24 +46,22 @@ class UPS {
             .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
     }
 
-    async getSNMP(oid) {
-        let session = this.session
-        console.log(await function () {
-            return new Promise(function (resolve) {
-                session.get([oid], function (error, varbinds) {
-                    if (error) {
-                        console.error(error);
-                    } else {
-                        if (snmp.isVarbindError(varbinds[0])) {
-                            console.error(snmp.varbindError(varbinds[0]));
-                        } else {
-                            console.log(varbinds[0].oid + " = " + varbinds[0].value);
-                            resolve(varbinds[0].value);
-                        }
-                    }
-                });
-            })
-        })
+    getSNMP(oid) {
+        return this.session.get([oid], this.handleGetSnmp);
+    }
+
+    handleGetSnmp(error, varbinds) {
+        if (error) {
+            console.error(error);
+        } else {
+            if (snmp.isVarbindError(varbinds[0])) {
+                console.error(snmp.varbindError(varbinds[0]));
+            } else {
+                console.log(varbinds[0].oid + " = " + varbinds[0].value);
+                this.model = varbinds[0].value;
+                return varbinds[0].value
+            }
+        }
     }
 
 
