@@ -1,0 +1,8 @@
+{
+  "name": "homebridge-apc-snmp-platform",
+  "displayName": "Homebridge APC SNMP Platform",
+  "version": "1.0.0",
+  "dependencies": {
+    "homebridge": "^1.3.4"
+  }
+}
