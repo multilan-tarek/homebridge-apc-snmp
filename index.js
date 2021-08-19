@@ -12,7 +12,7 @@ class UPS {
         this.api = api;
         this.session = snmp.createSession("10.0.30.3", "public");
         this.oids = {
-            "model": ["1.3.6.1.4.1.318.1.1.1.1.1.1.0"],
+            "model": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
             "manufacturer": "APC",
         };
 
@@ -53,7 +53,7 @@ class UPS {
                     }
                 }
             }
-            this.session.close ();
+            this.session.close();
         });
     }
 
