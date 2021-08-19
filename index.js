@@ -1,9 +1,10 @@
 var snmp = require("net-snmp");
-
+var inherits = require('util').inherits;
 
 module.exports = (api) => {
     api.registerAccessory('ups', UPS);
 };
+
 
 class UPS {
     constructor(log, config, api) {
@@ -62,35 +63,76 @@ class UPS {
         }
 
 
-        this.batteryService =new this.Service.BatteryService(this.name)
+        this.batteryService = new this.Service.BatteryService(this.name)
         this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery)
             .onGet(this.getLowBatteryHandler.bind(this))
-
         this.batteryService.getCharacteristic(this.Characteristic.BatteryLevel)
             .onGet(this.getBatteryLevelHandler.bind(this));
-
+        this.batteryService.getCharacteristic(this.Characteristic.ChargingState)
+            .onGet(this.getBatteryChargingStateHandler.bind(this));
 
         this.switchService = new this.Service.Switch(this.name);
         this.switchService.getCharacteristic(this.Characteristic.On)
             .onGet(this.getPowerStateHandler.bind(this))
             .onSet(this.setPowerStateHandler.bind(this));
-    }
 
-    getSnmp(oid) {
-        let value = ""
-        this.session.get([oid], function (error, varbinds) {
-            if (error) {
-                console.error(error);
-            } else {
-                if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
-                } else {
-                    console.log(varbinds[0].oid + "|" + varbinds[0].value);
-                    value = varbinds[0].value;
-                }
-            }
-        });
-        return value;
+        const PowerVolts = function () {
+            that.Characteristic.call(this, 'Volts', 'F208B4F8-51CF-49F1-A893-E94ED9636C54');
+            this.setProps({
+                format: that.Characteristic.Formats.UINT16,
+                unit: 'volts',
+                maxValue: 254,
+                minValue: 0,
+                minStep: 1,
+                perms: [that.Characteristic.Perms.READ, that.Characteristic.Perms.NOTIFY]
+            });
+            this.value = this.getDefaultValue();
+        };
+        inherits(PowerVolts, this.Characteristic);
+
+        const PowerAmps = function () {
+            that.Characteristic.call(this, 'Amps', 'E99525EC-E068-408F-9F6F-75BC4141F520');
+            this.setProps({
+                format: that.Characteristic.Formats.FLOAT,
+                unit: 'amps',
+                maxValue: 1000,
+                minValue: 0,
+                minStep: 0.1,
+                perms: [that.Characteristic.Perms.READ, that.Characteristic.Perms.NOTIFY]
+            });
+            this.value = this.getDefaultValue();
+        };
+        inherits(PowerAmps, this.Characteristic);
+
+        const PowerWatts = function () {
+            that.Characteristic.call(this, 'Watts', 'EAF81118-0168-4B42-BC90-3DA56902DC5B');
+            this.setProps({
+                format: that.Characteristic.Formats.UINT16,
+                unit: 'watts',
+                maxValue: 10000,
+                minValue: 0,
+                minStep: 1,
+                perms: [that.Characteristic.Perms.READ, that.Characteristic.Perms.NOTIFY]
+            });
+            this.value = this.getDefaultValue();
+        };
+        inherits(PowerWatts, this.Characteristic);
+
+        const PowerMeterService = function (displayName, subtype) {
+            that.Service.call(this, displayName, '00000001-0000-1777-8000-775D67EC4377', subtype);
+            this.addCharacteristic(PowerVolts);
+            this.addCharacteristic(PowerAmps);
+            this.addCharacteristic(PowerWatts);
+        };
+        inherits(PowerMeterService, this.Service);
+
+        this.powerService = new PowerMeterService(this.name);
+        this.powerService
+            .getCharacteristic(PowerVolts).onGet(this.getPowerVolts.bind(this))
+            .getCharacteristic(PowerAmps).onGet(this.getPowerAmps.bind(this))
+            .getCharacteristic(PowerWatts).onGet(this.getPowerWatts.bind(this));
+
+
     }
 
     setSnmp(oid, type, value) {
@@ -118,6 +160,7 @@ class UPS {
             this.informationService,
             this.batteryService,
             this.switchService,
+            this.powerService
         ];
     }
 
@@ -185,6 +228,74 @@ class UPS {
             }
         });
         return this.bat_capacity
+    }
+
+    async getBatteryChargingStateHandler() {
+        this.log.debug('Triggered GET getBatteryChargingStateHandler');
+        var that = this
+        this.session.get([this.oids.bat_capacity], function (error, varbinds) {
+            if (error) {
+                console.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    console.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    that.bat_capacity = varbinds[0].value.toString();
+                }
+            }
+        });
+        return this.bat_capacity
+    }
+
+    async getPowerVolts() {
+        this.log.debug('Triggered GET getPowerVolts');
+        //var that = this
+        //this.session.get([this.oids.bat_capacity], function (error, varbinds) {
+        //    if (error) {
+        //        console.error(error);
+        //    } else {
+        //        if (snmp.isVarbindError(varbinds[0])) {
+        //            console.error(snmp.varbindError(varbinds[0]));
+        //        } else {
+        //            that.bat_capacity = varbinds[0].value.toString();
+        //        }
+        //    }
+        //});
+        return 230
+    }
+
+    async getPowerAmps() {
+        this.log.debug('Triggered GET getPowerAmps');
+        //var that = this
+        //this.session.get([this.oids.bat_capacity], function (error, varbinds) {
+        //    if (error) {
+        //        console.error(error);
+        //    } else {
+        //        if (snmp.isVarbindError(varbinds[0])) {
+        //            console.error(snmp.varbindError(varbinds[0]));
+        //        } else {
+        //            that.bat_capacity = varbinds[0].value.toString();
+        //        }
+        //    }
+        //});
+        return 230
+    }
+
+    async getPowerWatts() {
+        this.log.debug('Triggered GET getPowerWatts');
+        //var that = this
+        //this.session.get([this.oids.bat_capacity], function (error, varbinds) {
+        //    if (error) {
+        //        console.error(error);
+        //    } else {
+        //        if (snmp.isVarbindError(varbinds[0])) {
+        //            console.error(snmp.varbindError(varbinds[0]));
+        //        } else {
+        //            that.bat_capacity = varbinds[0].value.toString();
+        //        }
+        //    }
+        //});
+        return 230
     }
 
 }
