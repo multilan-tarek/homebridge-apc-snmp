@@ -50,22 +50,22 @@ class UPS {
     }
 
     getSNMP(oid) {
-        return function () {
-            return new Promise(value => {
-                this.session.get([oid], function (error, varbinds) {
-                    if (error) {
-                        console.error(error);
+
+        return new Promise(value => {
+            this.session.get([oid], function (error, varbinds) {
+                if (error) {
+                    console.error(error);
+                } else {
+                    if (snmp.isVarbindError(varbinds[0])) {
+                        console.error(snmp.varbindError(varbinds[0]));
                     } else {
-                        if (snmp.isVarbindError(varbinds[0])) {
-                            console.error(snmp.varbindError(varbinds[0]));
-                        } else {
-                            console.log(varbinds[0].oid + " = " + varbinds[0].value);
-                            value(varbinds[0].value);
-                        }
+                        console.log(varbinds[0].oid + " = " + varbinds[0].value);
+                        value(varbinds[0].value);
                     }
-                });
+                }
             });
-        };
+        });
+
     }
 
 
