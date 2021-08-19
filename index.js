@@ -47,10 +47,12 @@ class UPS {
             if (error) {
                 console.error(error);
             } else {
-                if (snmp.isVarbindError(varbinds[0])) {
-                    console.error(snmp.varbindError(varbinds[0]));
-                } else {
-                    return varbinds[0].value;
+                for (var i = 0; i < varbinds.length; i++) {
+                    if (snmp.isVarbindError (varbinds[i])) {
+                        console.error (snmp.varbindError (varbinds[i]));
+                    } else {
+                        return varbinds[i].value;
+                    }
                 }
             }
         });
