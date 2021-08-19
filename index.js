@@ -21,11 +21,11 @@ class UPS {
         };
 
 
-        let service = this.api.hap.Service;
-        let characteristic = this.api.hap.Characteristic;
+        var service = this.api.hap.Service;
+        var characteristic = this.api.hap.Characteristic;
 
-        let informationService = new this.api.hap.Service.AccessoryInformation()
-            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
+        var informationService = new this.service.AccessoryInformation()
+            .setCharacteristic(characteristic.Manufacturer, "APC")
 
         for (const [key, value] of Object.entries(this.oids)) {
             if (key === "model" || key === "serial_number" || key === "firmware_rev") {
@@ -43,6 +43,8 @@ class UPS {
                                     .setCharacteristic(characteristic.Name, varbinds[0].value)
                             } else if (key === "serial_number") {
                                 informationService.setCharacteristic(characteristic.SerialNumber, varbinds[0].value)
+                            } else if (key === "firmware_rev") {
+                                informationService.setCharacteristic(characteristic.FirmwareRevision, varbinds[0].value)
                             }
                         }
                     }
