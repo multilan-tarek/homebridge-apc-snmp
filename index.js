@@ -179,7 +179,7 @@ class UPS {
                 }
             }
         });
-        if (this.time_on_bat === 0) {
+        if (this.time_on_bat === "0") {
             console.log(1)
             return 1;
 
