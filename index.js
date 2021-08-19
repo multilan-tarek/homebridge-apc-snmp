@@ -12,7 +12,7 @@ class UPS {
         this.api = api;
         this.session = snmp.createSession("10.0.30.3", "public");
         this.oids = {
-            "model": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
+            "model": ["1.3.6.1.4.1.318.1.1.1.1.1.1.0"],
             "manufacturer": "APC",
         };
 
@@ -21,7 +21,8 @@ class UPS {
         this.Service = this.api.hap.Service;
         this.Characteristic = this.api.hap.Characteristic;
 
-        this.log.debug("Model is: " + this.session.get(this.oids.model))
+
+        this.getFromSnmp(this.oids.model)
 
         this.informationService = new this.api.hap.Service.AccessoryInformation()
             .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
@@ -38,6 +39,24 @@ class UPS {
             .onGet(this.getOnHandler.bind(this))   // bind to getOnHandler method below
             .onSet(this.setOnHandler.bind(this));  // bind to setOnHandler method below
     }
+
+    getFromSnmp(oid) {
+        this.session.get ([oid], function (error, varbinds) {
+            if (error) {
+                console.error (error);
+            } else {
+                for (let i = 0; i < varbinds.length; i++) {
+                    if (snmp.isVarbindError (varbinds[i])) {
+                        console.error (snmp.varbindError (varbinds[i]));
+                    } else {
+                        console.log (varbinds[i].oid + " = " + varbinds[i].value);
+                    }
+                }
+            }
+            this.session.close ();
+        });
+    }
+
 
     /**
      * REQUIRED - This must return an array of the services you want to expose.
@@ -62,4 +81,6 @@ class UPS {
     async setOnHandler(value) {
         this.log.info('Setting switch state to:', value);
     }
+
+
 }
