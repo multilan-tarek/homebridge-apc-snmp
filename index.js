@@ -30,10 +30,9 @@ class UPS {
         this.name = config.name;
 
         this.informationService = new this.api.hap.Service.AccessoryInformation()
-            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "American Power Conversion (APC)")
+            .setCharacteristic(this.api.hap.Characteristic.Manufacturer, "APC")
 
         var that = this
-        this.log("UPS Info:");
         for (const [key, value] of Object.entries(this.oids)) {
             if (key === "model" || key === "serial_number" || key === "firmware_rev") {
                 this.session.get([value], function (error, varbinds) {
@@ -76,6 +75,45 @@ class UPS {
         this.switchService.getCharacteristic(this.Characteristic.On)
             .onGet(this.getPowerStateHandler.bind(this))
             .onSet(this.setPowerStateHandler.bind(this));
+
+        this.alarmService = new this.Service(this.Service.SecuritySystem);
+        this.alarmService.getCharacteristic(this.Characteristic.SecuritySystemCurrentState)
+            .onGet(this.handleSecuritySystemCurrentStateGet.bind(this));
+
+        this.alarmService.getCharacteristic(this.Characteristic.SecuritySystemTargetState)
+            .onGet(this.handleSecuritySystemTargetStateGet.bind(this))
+            .onSet(this.handleSecuritySystemTargetStateSet.bind(this));
+
+
+    }
+
+    handleSecuritySystemCurrentStateGet() {
+        this.log.debug('Triggered GET SecuritySystemCurrentState');
+
+        // set this to a valid value for SecuritySystemCurrentState
+        const currentValue = this.Characteristic.SecuritySystemCurrentState.STAY_ARM;
+
+        return currentValue;
+    }
+
+
+    /**
+     * Handle requests to get the current value of the "Security System Target State" characteristic
+     */
+    handleSecuritySystemTargetStateGet() {
+        this.log.debug('Triggered GET SecuritySystemTargetState');
+
+        // set this to a valid value for SecuritySystemTargetState
+        const currentValue = this.Characteristic.SecuritySystemTargetState.STAY_ARM;
+
+        return currentValue;
+    }
+
+    /**
+     * Handle requests to set the "Security System Target State" characteristic
+     */
+    handleSecuritySystemTargetStateSet(value) {
+        this.log.debug('Triggered SET SecuritySystemTargetState:' + value);
     }
 
     setSnmp(oid, type, value) {
