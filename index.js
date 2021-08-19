@@ -64,55 +64,18 @@ class UPS {
         }
 
 
-        //this.batteryService = new this.Service.BatteryService(this.name)
-        //this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery)
-        //    .onGet(this.getLowBatteryHandler.bind(this))
-        //this.batteryService.getCharacteristic(this.Characteristic.BatteryLevel)
-        //    .onGet(this.getBatteryLevelHandler.bind(this));
-        //this.batteryService.getCharacteristic(this.Characteristic.ChargingState)
-        //    .onGet(this.getBatteryChargingStateHandler.bind(this));
+        this.batteryService = new this.Service.BatteryService(this.name)
+        this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery)
+            .onGet(this.getLowBatteryHandler.bind(this))
+        this.batteryService.getCharacteristic(this.Characteristic.BatteryLevel)
+            .onGet(this.getBatteryLevelHandler.bind(this));
+        this.batteryService.getCharacteristic(this.Characteristic.ChargingState)
+            .onGet(this.getBatteryChargingStateHandler.bind(this));
 
         this.switchService = new this.Service.Switch(this.name);
         this.switchService.getCharacteristic(this.Characteristic.On)
             .onGet(this.getPowerStateHandler.bind(this))
             .onSet(this.setPowerStateHandler.bind(this));
-
-        const PowerService = function (displayName, subtype) {
-            that.Service.call(this, displayName, '00000001-0000-1000-8000-135D67EC4377', subtype)
-            this.addCharacteristic(that.CommunityTypes.Volts)
-            //this.addCharacteristic(that.CommunityTypes.BatteryVoltageDC)
-            //this.addCharacteristic(that.CommunityTypes.UPSLoadPercent)
-            //this.addCharacteristic(that.CommunityTypes.Volts)
-            //this.addCharacteristic(that.CommunityTypes.VoltAmperes)
-            //this.addOptionalCharacteristic(that.CommunityTypes.Watts)
-            //this.addOptionalCharacteristic(that.CommunityTypes.KilowattHours)
-            //this.addOptionalCharacteristic(that.CommunityTypes.OutputVoltageAC)
-            //this.addOptionalCharacteristic(that.CommunityTypes.OutputVoltAmperes)
-            //this.addOptionalCharacteristic(that.Characteristic.CurrentTemperature)
-            //this.addCharacteristic(that.CommunityTypes.EveResetTotal)
-        }
-        inherits(PowerService, this.Service)
-
-        this.powerService = new PowerService()
-        this.powerService.getCharacteristic(this.CommunityTypes.Volts)
-
-            .onGet(this.getInputVoltageHandler.bind(this))
-        //this.powerService
-        //    .getCharacteristic(CommunityTypes.BatteryVoltageDC)
-        //    .on('get', this.getBatteryVoltageDC.bind(this))
-        //this.powerService
-        //    .getCharacteristic(CommunityTypes.UPSLoadPercent)
-        //    .on('get', this.getUPSLoadPercent.bind(this))
-        //this.powerService
-        //    .getCharacteristic(CommunityTypes.Volts)
-        //    .on('get', this.getVolts.bind(this))
-        //this.powerService
-        //    .getCharacteristic(CommunityTypes.VoltAmperes)
-        //    .on('get', this.getVoltAmperes.bind(this))
-        //this.powerService
-        //    .getCharacteristic(CommunityTypes.EveResetTotal)
-        //    .on('get', this.getEveResetTotal.bind(this))
-        //    .on('set', this.setEveResetTotal.bind(this))
     }
 
     setSnmp(oid, type, value) {
@@ -226,10 +189,5 @@ class UPS {
             }
         });
         return 2
-    }
-
-    async getInputVoltageHandler() {
-        this.log.info('Triggered GET getInputVoltageHandler');
-        return 230;
     }
 }
