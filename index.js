@@ -62,7 +62,8 @@ class UPS {
 
         this.batteryService =new this.Service.BatteryService(this.name)
         this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery)
-            .on('get', this.getLowBatteryHandler.bind(this));
+            .onGet(this.getLowBatteryHandler.bind(this))
+            .onGet(this.getBatteryLevelHandler.bind(this));
 
 
         this.switchService = new this.Service.Switch(this.name);
@@ -146,5 +147,11 @@ class UPS {
         return this.Characteristic.StatusLowBattery.BATTERY_LEVEL_NORMAL;
     }
 
+    async getBatteryLevelHandler() {
+        this.log.debug('Triggered GET getBatteryLevelHandler');
+
+        // set this to a valid value for StatusLowBattery
+        return this.Characteristic.BATTERY_LEVEL_NORMAL;
+    }
 
 }
