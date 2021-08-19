@@ -112,6 +112,7 @@ class UPS {
     getServices() {
         return [
             this.informationService,
+            this.batteryService,
             this.switchService,
         ];
     }
