@@ -27,6 +27,7 @@ class UPS {
             "time_on_bat": "1.3.6.1.4.1.318.1.1.1.2.1.2.0",
             "alarm_state": "1.3.6.1.4.1.318.1.1.1.5.2.4.0",
             "selftest_state": "1.3.6.1.4.1.318.1.1.1.7.2.3.0",
+            "temp": "1.3.6.1.4.1.318.1.1.1.2.2.2.0",
             "turn_on": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.6.0", "type": snmp.ObjectType.INTEGER, "value": 2},
             "turn_off": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 2},
             "turn_off_graceful": {"oid": "1.3.6.1.4.1.318.1.1.1.6.2.1.0", "type": snmp.ObjectType.INTEGER, "value": 3},
@@ -100,7 +101,11 @@ class UPS {
             .onGet(this.getSelftestHandler.bind(this))
             .onSet(this.setSelftestHandler.bind(this));
 
-        this.services.push(this.batteryService);
+        this.tempService = new this.Service.TemperatureSensor(this.name + " Temperature");
+        this.tempService.getCharacteristic(this.Characteristic.CurrentTemperature)
+            .onGet(this.getTempHandler.bind(this));
+
+
         this.services.push(this.informationService);
 
         if (this.config.enable_non_graceful === true) {
@@ -114,6 +119,12 @@ class UPS {
         }
         if (this.config.enable_selftest === true) {
             this.services.push(this.selftestSwitchService)
+        }
+        if (this.config.enable_temp === true) {
+            this.services.push(this.tempService)
+        }
+        if (this.config.enable_battery === true) {
+            this.services.push(this.batteryService)
         }
 
     }
@@ -241,6 +252,23 @@ class UPS {
         } else {
             return 0
         }
+    }
+
+    async getTempHandler() {
+        this.log.debug('Triggered GET getTempHandler');
+        var that = this
+        this.session.get([this.oids.temp], function (error, varbinds) {
+            if (error) {
+                that.log.error(error);
+            } else {
+                if (snmp.isVarbindError(varbinds[0])) {
+                    that.log.error(snmp.varbindError(varbinds[0]));
+                } else {
+                    that.temp = varbinds[0].value.toString();
+                }
+            }
+        });
+        return this.temp;
     }
 
     async getBatteryLevelHandler() {
