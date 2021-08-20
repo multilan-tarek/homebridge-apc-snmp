@@ -244,7 +244,6 @@ class UPS {
     }
 
     async getBatteryLevelHandler() {
-        this.bat_capacity = 0;
         this.log.debug('Triggered GET getBatteryLevelHandler');
         var that = this
         this.session.get([this.oids.bat_capacity], function (error, varbinds) {
