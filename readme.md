@@ -48,5 +48,3 @@ https://www.npmjs.com/package/homebridge-apc-snmp
   "address": "10.0.30.3"
 }
 ```
-
-*Boolean switches are by default *true*
