@@ -13,6 +13,10 @@ class UPS {
     }
 
     constructor(log, config, api) {
+        this.model = null;
+        this.serialNumber = null;
+        this.firmwareRev = null;
+
         this.log = log;
         this.config = config;
         this.api = api;
@@ -40,9 +44,8 @@ class UPS {
         this.Characteristic = this.api.hap.Characteristic;
         this.name = this.config.name;
 
-        this.informationService = new this.Service.AccessoryInformation().setCharacteristic(
-            this.Characteristic.Manufacturer, "APC"
-        );
+        this.informationService = new this.Service.AccessoryInformation()
+        this.informationService.setCharacteristic(this.Characteristic.Manufacturer, "APC");
         this.informationService.getCharacteristic(this.Characteristic.Model).onGet(
             this.getModelHandler.bind(this)
         );
@@ -52,32 +55,6 @@ class UPS {
         this.informationService.getCharacteristic(this.Characteristic.FirmwareRevision).onGet(
             this.getFirmwareRevHandler.bind(this)
         );
-
-        for (const [key, value] of Object.entries(this.oids)) {
-            if (key === "model" || key === "serial_number" || key === "firmware_rev") {
-                let logging = this.log;
-                this.session.get([value], function (error, varbinds) {
-                    if (error) {
-                        logging.error(error);
-                    } else if (snmp.isVarbindError(varbinds[0])) {
-                        logging.error(snmp.varbindError(varbinds[0]));
-                    } else {
-                        switch (key) {
-                            case "model":
-                                logging("Model: " + varbinds[0].value.toString());
-                                logging("Manufacturer: " + "APC");
-                                return;
-                            case "serial_number":
-                                logging("Serial Number: " + varbinds[0].value.toString());
-                                return;
-                            case "firmware_rev":
-                                logging("Firmware Rev.: " + varbinds[0].value.toString());
-                                return;
-                        }
-                    }
-                });
-            }
-        }
 
         this.batteryService = new this.Service.BatteryService(this.name);
         this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery).onGet(
@@ -109,7 +86,7 @@ class UPS {
             this.setAlarmStateHandler.bind(this)
         );
 
-        this.selfTestSwitchService = new this.Service.Switch(this.name + " Self Test", "Self Test");
+        this.selfTestSwitchService = new this.Service.Switch(this.name + " Self-Test", "Self-Test");
         this.selfTestSwitchService.getCharacteristic(this.Characteristic.On).onGet(
             this.getSelfTestHandler.bind(this)
         ).onSet(
@@ -122,24 +99,28 @@ class UPS {
         );
 
         this.services.push(this.informationService);
-        if (!this.config.enable_non_graceful === false) {
+        if (this.config.enable_non_graceful || this.config.enable_non_graceful === undefined) {
             this.services.push(this.switchService);
         }
-        if (!this.config.enable_graceful === false) {
+        if (this.config.enable_graceful || this.config.enable_graceful === undefined) {
             this.services.push(this.gracefulSwitchService)
         }
-        if (!this.config.enable_alarm === false) {
+        if (this.config.enable_alarm || this.config.enable_alarm === undefined) {
             this.services.push(this.alarmSwitchService)
         }
-        if (!this.config.enable_self_test === false) {
+        if (this.config.enable_self_test || this.config.enable_self_test === undefined) {
             this.services.push(this.selfTestSwitchService)
         }
-        if (!this.config.enable_temp === false) {
+        if (this.config.enable_temp || this.config.enable_temp === undefined) {
             this.services.push(this.tempService)
         }
-        if (!this.config.enable_battery === false) {
+        if (this.config.enable_battery || this.config.enable_battery === undefined) {
             this.services.push(this.batteryService)
         }
+
+        this.getModelHandler();
+        this.getSerialNumberHandler();
+        this.getFirmwareRevHandler();
     }
 
     // Helper
@@ -148,14 +129,14 @@ class UPS {
         let logging = this.log;
         this.session.set([{oid, type, value}], function (error, varbinds) {
             if (error) {
-                logging.error(error.toString());
+                logging.debug(error.toString());
                 return null;
             }
             for (let i = 0; i < varbinds.length; i++) {
                 if (snmp.isVarbindError(varbinds[i])) {
-                    logging.error(snmp.varbindError(varbinds[i]));
+                    logging.debug(snmp.varbindError(varbinds[i]));
                 } else {
-                    logging.info("Set " + varbinds[i].oid + " to value " + varbinds[i].value);
+                    logging.debug("Set " + varbinds[i].oid + " to value " + varbinds[i].value);
                 }
             }
         });
@@ -163,28 +144,52 @@ class UPS {
 
     async getSNMP(oid) {
         let logging = this.log;
-        return await this.session.get([oid], function (error, varbinds) {
-            if (error) {
-                logging.error(error);
-            } else if (snmp.isVarbindError(varbinds[0])) {
-                logging.error(snmp.varbindError(varbinds[0]));
-            } else {
-                let val = varbinds[0].value.toString();
-                logging.debug(val);
-                return val;
+        let session = this.session;
+        let timeoutPromise = new Promise((resolve, reject) => {
+            setTimeout(() => {
+                reject(new Error('timeout'));
+            }, 1800);
+        });
+
+        let snmpPromise = new Promise(function (resolve, reject) {
+            try {
+                session.get([oid], function (error, varbinds) {
+                    if (error) {
+                        logging.debug(error);
+                        reject(error.toString());
+                    } else if (snmp.isVarbindError(varbinds[0])) {
+                        logging.debug(snmp.varbindError(varbinds[0]));
+                        reject(snmp.varbindError(varbinds[0]).toString());
+                    } else {
+                        logging.debug("Got " + oid + " value " + varbinds[0].value);
+                        resolve(varbinds[0].value.toString());
+                    }
+                })
+            } catch (RequestFailedError) {
+                logging.warn("Device not reachable or operation not supported")
             }
         });
+
+        return Promise.race([snmpPromise, timeoutPromise])
+            .then(result => {
+                return result;
+            })
+            .catch(error => {
+                return null;
+            });
     }
 
-    // Self Test
+    // Self-Test
 
     async getSelfTestHandler() {
         this.log.debug('Triggered GET setSelfTestHandler');
-        return await this.getSNMP(this.oids.selftest_state) > 3;
+        return await this.getSNMP(this.oids.self_test_state) > 3;
     }
 
     async setSelfTestHandler(value) {
         this.log.debug('Triggered SET setSelfTestHandler');
+        this.log.info('Starting UPS self-test...')
+        this.log.info('After the self-test is completed, the UPS will be unavailable for a few seconds.')
         value ? this.setSNMP(
             this.oids.start_self_test.oid,
             this.oids.start_self_test.type,
@@ -256,16 +261,43 @@ class UPS {
 
     async getModelHandler() {
         this.log.debug('Triggered GET getModelHandler');
-        return await this.getSNMP(this.oids.model);
+        if (this.model != null) {
+            return this.model;
+        }
+        let val = await this.getSNMP(this.oids.model);
+        if (!val) {
+            return "Unknown"
+        }
+        this.model = val;
+        this.log.info("Model: " + this.model);
+        return this.model;
     }
 
     async getSerialNumberHandler() {
         this.log.debug('Triggered GET getSerialNumberHandler');
-        return await this.getSNMP(that.oids.serial_number);
+        if (this.serialNumber != null) {
+            return this.serialNumber;
+        }
+        let val = await this.getSNMP(this.oids.serial_number);
+        if (!val) {
+            return "Unknown"
+        }
+        this.serialNumber = val;
+        this.log.info("Serial Number: " + this.serialNumber);
+        return this.serialNumber;
     }
 
     async getFirmwareRevHandler() {
         this.log.debug('Triggered GET getFirmwareRevHandler');
-        return await this.getSNMP(that.oids.firmware_rev);
+        if (this.firmwareRev != null) {
+            return this.firmwareRev;
+        }
+        let val = await this.getSNMP(this.oids.firmware_rev);
+        if (!val) {
+            return "Unknown"
+        }
+        this.firmwareRev = val;
+        this.log.info("Firmware Rev.: " + this.firmwareRev);
+        return this.firmwareRev;
     }
 }
