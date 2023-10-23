@@ -5,7 +5,7 @@ https://www.npmjs.com/package/homebridge-apc-snmp
 #### Tested with an APC SmartUPS 750 RM (SUA750RMI2U) with the AP9606 Web/SNMP Card
 
 
-## How to get started
+## Getting Started
 1. Install "homebridge-apc-snmp" using the Web UI or "npm install homebridge-apc-snmp"
 2. Create a new accessory config entry
 3. Set the *accessory* setting to *ups*
@@ -15,18 +15,38 @@ https://www.npmjs.com/package/homebridge-apc-snmp
 7. (You can add multiple entries, if you have more than one UPS)
 8. Save the config and restart Homebridge
 
-## Config settings
+## Config Flags
+
+`accessory` - Has to be *ups*
+
+`name` - Friendly name of the accessory
+
+`community` - SNMP community name
+
+`address` - IP address of the SNMP device
+
+`enable_non_graceful`** - *Non Graceful* power switch function
+
+`enable_graceful`** - *Graceful* power switch function
+
+`enable_alarm`** - Switch for enabling or disabling the alarm
+
+`enable_self_test`** - Switch for starting a self test
+
+`enable_temp`** - Internal temperature function
+
+`enable_battery`** - Battery state of charge indicator
+
+** Values are enabled by default
+
+## Example Config
 ```json
 {
-  "accessory": "ups",                   // Must be this value
-  "name": "UPS",                        // Friendly name of the accessory
-  "community": "private",               // Name of the SNMP community
-  "address": "10.0.30.3",               // IP Address of the SNMP host
-  "enable_non_graceful": true,          // Enables switch for power on and off
-  "enable_graceful": true,              // Enables switch for power on and gracefully off
-  "enable_alarm": true,                 // Enables switch for alarm on and off
-  "enable_selftest": true,              // Enables switch to start a self test
-  "enable_temp": true,                  // Enables temperature sensor service
-  "enable_battery": true                // Enables battery service
+  "accessory": "ups",                
+  "name": "UPS",                     
+  "community": "private",             
+  "address": "10.0.30.3"
 }
 ```
+
+*Boolean switches are by default *true*
