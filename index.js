@@ -20,6 +20,10 @@ class UPS {
         this.model = null;
         this.serialNumber = null;
         this.firmwareRev = null;
+        this.cached_battery_level = 0;
+        this.cached_charging_state = false;
+        this.cached_low_battery = 0;
+        this.cached_temperature = 0;
 
         this.log = log;
         this.config = config;
@@ -261,7 +265,8 @@ class UPS {
     async getTempHandler() {
         this.log.debug('Triggered GET getTempHandler')
         let temp = await this.getSNMP(this.oids.temp);
-        return temp ? temp : 0;
+        temp ? this.cached_temperature = temp : null;
+        return temp ? temp : this.cached_temperature;
     }
 
     // Battery
@@ -269,19 +274,29 @@ class UPS {
     async getBatteryLevelHandler() {
         this.log.debug('Triggered GET getBatteryLevelHandler');
         let level = await this.getSNMP(this.oids.bat_capacity);
-        return level ? level : 0;
+        level ? this.cached_battery_level = level : null;
+        return level ? level : this.cached_battery_level;
     }
 
     async getLowBatteryHandler() {
         this.log.debug('Triggered GET getLowBatteryHandler');
         let status = await this.getSNMP(this.oids.bat_status);
+        if (status === null) {
+            return this.cached_low_battery;
+        }
+        status ? this.cached_low_battery = status === 3 : null;
         return status === 3 ? 1 : 0;
     }
 
 
     async getBatteryChargingStateHandler() {
         this.log.debug('Triggered GET getBatteryChargingStateHandler');
-        return await this.getSNMP(this.oids.time_on_bat) === "0" ? 1 : 0;
+        let charging = await this.getSNMP(this.oids.time_on_bat);
+        if (charging === null) {
+            return this.cached_charging_state;
+        }
+        charging ? this.cached_charging_state = charging : null;
+        return charging === "0" ? 1 : 0;
     }
 
     // Stuff for information service
