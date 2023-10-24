@@ -37,7 +37,11 @@ https://git.multilan.de/tarek/homebridge-apc-snmp-platform.git
 
 `enable_battery`** - Battery state of charge indicator
 
+`update_interval`*** - Update interval in seconds
+
 ** Values are enabled by default
+*** Default value is 20 seconds
+
 
 ## Example Config
 ```json

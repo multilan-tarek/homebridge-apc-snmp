@@ -24,6 +24,7 @@ class UPS {
         this.cached_charging_state = false;
         this.cached_low_battery = 0;
         this.cached_temperature = 0;
+        this.updateInterval = 20000;
 
         this.log = log;
         this.config = config;
@@ -128,6 +129,20 @@ class UPS {
             this.services.push(this.batteryService)
         }
 
+        let configUpdateInterval = this.config.update_interval;
+        if (configUpdateInterval !== undefined) {
+            if (Number.isInteger(configUpdateInterval)) {
+                if (configUpdateInterval < 5) {
+                    this.log.error("Minimum update interval value is 5 seconds!");
+                } else {
+                    this.updateInterval = configUpdateInterval * 1000;
+                }
+            } else {
+                this.log.error("Update interval is not a number!");
+            }
+
+        }
+
         this.getModelHandler();
         this.getSerialNumberHandler();
         this.getFirmwareRevHandler();
@@ -137,7 +152,7 @@ class UPS {
     // Helper
 
     async updateLoop() {
-        setInterval(function() {this.update()}.bind(this), 20000)
+        setInterval(function() {this.update()}.bind(this), this.updateInterval)
     };
 
     async update() {
