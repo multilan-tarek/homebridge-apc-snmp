@@ -12,6 +12,10 @@ class UPS {
         return this.services;
     }
 
+    configureAccessory(accessory) {
+        console.log(accessory)
+    }
+
     constructor(log, config, api) {
         this.model = null;
         this.serialNumber = null;
@@ -68,7 +72,9 @@ class UPS {
         );
 
         this.switchService = new this.Service.Switch(this.name);
-        this.switchService.getCharacteristic(this.Characteristic.On).onGet(this.getPowerStateHandler.bind(this)).onSet(
+        this.switchService.getCharacteristic(this.Characteristic.On).onGet(
+            this.getPowerStateHandler.bind(this)
+        ).onSet(
             this.setPowerStateHandler.bind(this)
         );
 
@@ -121,9 +127,30 @@ class UPS {
         this.getModelHandler();
         this.getSerialNumberHandler();
         this.getFirmwareRevHandler();
+        this.updateLoop();
     }
 
     // Helper
+
+    async updateLoop() {
+        setInterval(function() {this.update()}.bind(this), 20000)
+    };
+
+    async update() {
+        this.log.info("UPDATE")
+        this.tempService.getCharacteristic(this.Characteristic.CurrentTemperature).updateValue(
+            await this.getTempHandler()
+        );
+        this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery).updateValue(
+            await this.getLowBatteryHandler()
+        );
+        this.batteryService.getCharacteristic(this.Characteristic.BatteryLevel).updateValue(
+            await this.getBatteryLevelHandler()
+        );
+        this.batteryService.getCharacteristic(this.Characteristic.ChargingState).updateValue(
+            await this.getBatteryChargingStateHandler()
+        );
+    }
 
     setSNMP(oid, type, value) {
         let logging = this.log;
