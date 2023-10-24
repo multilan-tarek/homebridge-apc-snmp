@@ -141,7 +141,7 @@ class UPS {
     };
 
     async update() {
-        this.log.info("UPDATE")
+        this.log.debug("Updating values...")
         this.tempService.getCharacteristic(this.Characteristic.CurrentTemperature).updateValue(
             await this.getTempHandler()
         );
