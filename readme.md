@@ -1,6 +1,6 @@
 # homebridge-apc-snmp
 ### APC UPS SNMP plugin for homebridge - Version 1.2.0
-https://www.npmjs.com/package/homebridge-apc-snmp
+https://www.npmjs.com/package/homebridge-apc-snmp  \
 https://git.multilan.de/tarek/homebridge-apc-snmp-platform.git
 #### Tested with an APC SmartUPS 750 RM (SUA750RMI2U) with the AP9606 Web/SNMP Card
 
@@ -39,7 +39,7 @@ https://git.multilan.de/tarek/homebridge-apc-snmp-platform.git
 
 `update_interval`*** - Update interval in seconds
 
-** Values are enabled by default
+** Values are enabled by default\
 *** Default value is 20 seconds
 
 
