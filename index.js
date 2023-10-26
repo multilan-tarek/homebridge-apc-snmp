@@ -17,20 +17,29 @@ class UPS {
     }
 
     constructor(log, config, api) {
-        this.model = null;
-        this.serialNumber = null;
-        this.firmwareRev = null;
-        this.cached_battery_level = 0;
-        this.cached_charging_state = false;
-        this.cached_low_battery = 0;
-        this.cached_temperature = 0;
+        this.cachedInformations = {};
+        this.cachedBatteryLevel = 0;
+        this.cachedBatteryLevel = false;
+        this.cachedLowBattery = 0;
+        this.cachedTemperature = 0;
         this.updateInterval = 20000;
+        this.outletGroupsSupported = false;
+        this.envTemp1Supported = false;
+        this.envTemp2Supported = false;
+        this.envHum1Supported = false;
+        this.envHum2Supported = false;
 
         this.log = log;
         this.config = config;
         this.api = api;
         this.session = snmp.createSession(this.config.address, this.config.community);
         this.oids = {
+            "env_temp_1": ".1.3.6.1.4.1.318.1.1.2.1.1.0",
+            "env_temp_2": ".1.3.6.1.4.1.318.1.1.2.1.3.0",
+            "env_hum_1": ".1.3.6.1.4.1.318.1.1.2.1.2.0",
+            "env_hum_2": ".1.3.6.1.4.1.318.1.1.2.1.4.0",
+            "date_of_manufacture": "1.3.6.1.4.1.318.1.1.1.1.2.2.0",
+            "name": "1.3.6.1.4.1.318.1.1.1.1.1.2.0",
             "model": "1.3.6.1.4.1.318.1.1.1.1.1.1.0",
             "serial_number": "1.3.6.1.4.1.318.1.1.1.1.2.3.0",
             "firmware_rev": "1.3.6.1.4.1.318.1.1.1.1.2.1.0",
@@ -55,15 +64,19 @@ class UPS {
 
         this.informationService = new this.Service.AccessoryInformation()
         this.informationService.setCharacteristic(this.Characteristic.Manufacturer, "APC");
+        this.informationService.getCharacteristic(this.Characteristic.Name).onGet(
+            this.getCachedAccessoryInformation.bind(this, this.oids.name, "Name")
+        );
         this.informationService.getCharacteristic(this.Characteristic.Model).onGet(
-            this.getModelHandler.bind(this)
+            this.getCachedAccessoryInformation.bind(this, this.oids.model, "Model")
         );
         this.informationService.getCharacteristic(this.Characteristic.SerialNumber).onGet(
-            this.getSerialNumberHandler.bind(this)
+            this.getCachedAccessoryInformation.bind(this, this.oids.serial_number, "Serial Number")
         );
         this.informationService.getCharacteristic(this.Characteristic.FirmwareRevision).onGet(
-            this.getFirmwareRevHandler.bind(this)
+            this.getCachedAccessoryInformation.bind(this, this.oids.firmware_rev, "Firmware Rev.")
         );
+
 
         this.batteryService = new this.Service.BatteryService(this.name);
         this.batteryService.getCharacteristic(this.Characteristic.StatusLowBattery).onGet(
@@ -104,7 +117,7 @@ class UPS {
             this.setSelfTestHandler.bind(this)
         );
 
-        this.tempService = new this.Service.TemperatureSensor(this.name + " Temperature");
+        this.tempService = new this.Service.TemperatureSensor(this.name + " Battery");
         this.tempService.getCharacteristic(this.Characteristic.CurrentTemperature).onGet(
             this.getTempHandler.bind(this)
         );
@@ -143,16 +156,29 @@ class UPS {
 
         }
 
-        this.getModelHandler();
-        this.getSerialNumberHandler();
-        this.getFirmwareRevHandler();
+        this.getInitialAccessoryInformation();
         this.updateLoop();
+    }
+
+    async getInitialAccessoryInformation() {
+        await this.getCachedAccessoryInformation(this.oids.name, "Name");
+        await this.getCachedAccessoryInformation(this.oids.model, "Model");
+        await this.getCachedAccessoryInformation(this.oids.serial_number, "Serial Number");
+        await this.getCachedAccessoryInformation(this.oids.firmware_rev, "Firmware Rev.");
+        await this.getCachedAccessoryInformation(this.oids.date_of_manufacture, "Date Of Manufacture");
+
+        await this.getSNMP(this.oids.env_temp_1) !== null ? this.envTemp1Supported = true : null;
+        await this.getSNMP(this.oids.env_temp_2) !== null ? this.envTemp2Supported = true : null;
+        await this.getSNMP(this.oids.env_hum_1) !== null ? this.envHum1Supported = true : null;
+        await this.getSNMP(this.oids.env_hum_2) !== null ? this.envHum2Supported = true : null;
     }
 
     // Helper
 
     async updateLoop() {
-        setInterval(function() {this.update()}.bind(this), this.updateInterval)
+        setInterval(function () {
+            this.update()
+        }.bind(this), this.updateInterval)
     };
 
     async update() {
@@ -280,8 +306,8 @@ class UPS {
     async getTempHandler() {
         this.log.debug('Triggered GET getTempHandler')
         let temp = await this.getSNMP(this.oids.temp);
-        temp ? this.cached_temperature = temp : null;
-        return temp ? temp : this.cached_temperature;
+        temp ? this.cachedTemperature = temp : null;
+        return temp ? temp : this.cachedTemperature;
     }
 
     // Battery
@@ -289,17 +315,17 @@ class UPS {
     async getBatteryLevelHandler() {
         this.log.debug('Triggered GET getBatteryLevelHandler');
         let level = await this.getSNMP(this.oids.bat_capacity);
-        level ? this.cached_battery_level = level : null;
-        return level ? level : this.cached_battery_level;
+        level ? this.cachedBatteryLevel = level : null;
+        return level ? level : this.cachedBatteryLevel;
     }
 
     async getLowBatteryHandler() {
         this.log.debug('Triggered GET getLowBatteryHandler');
         let status = await this.getSNMP(this.oids.bat_status);
         if (status === null) {
-            return this.cached_low_battery;
+            return this.cachedLowBattery;
         }
-        status ? this.cached_low_battery = status === 3 : null;
+        status ? this.cachedLowBattery = status === 3 : null;
         return status === 3 ? 1 : 0;
     }
 
@@ -308,53 +334,28 @@ class UPS {
         this.log.debug('Triggered GET getBatteryChargingStateHandler');
         let charging = await this.getSNMP(this.oids.time_on_bat);
         if (charging === null) {
-            return this.cached_charging_state;
+            return this.cachedBatteryLevel;
         }
-        charging ? this.cached_charging_state = charging : null;
+        charging ? this.cachedBatteryLevel = charging : null;
         return charging === "0" ? 1 : 0;
     }
 
-    // Stuff for information service
+    async getCachedAccessoryInformation(oid, log_text) {
+        if (!this.cachedInformations.hasOwnProperty(oid)) {
+            this.cachedInformations[oid] = null;
+        }
 
-    async getModelHandler() {
-        this.log.debug('Triggered GET getModelHandler');
-        if (this.model != null) {
-            return this.model;
+        let val = await this.getSNMP(oid);
+        if (val) {
+            this.cachedInformations[oid] === null ? this.log.info(log_text + ": " + val) : null;
+            this.cachedInformations[oid] = val;
+            return val;
         }
-        let val = await this.getSNMP(this.oids.model);
-        if (!val) {
-            return "Unknown"
-        }
-        this.model = val;
-        this.log.info("Model: " + this.model);
-        return this.model;
-    }
 
-    async getSerialNumberHandler() {
-        this.log.debug('Triggered GET getSerialNumberHandler');
-        if (this.serialNumber != null) {
-            return this.serialNumber;
+        if (this.cachedInformations[oid] === null) {
+            return "Unknown";
         }
-        let val = await this.getSNMP(this.oids.serial_number);
-        if (!val) {
-            return "Unknown"
-        }
-        this.serialNumber = val;
-        this.log.info("Serial Number: " + this.serialNumber);
-        return this.serialNumber;
-    }
 
-    async getFirmwareRevHandler() {
-        this.log.debug('Triggered GET getFirmwareRevHandler');
-        if (this.firmwareRev != null) {
-            return this.firmwareRev;
-        }
-        let val = await this.getSNMP(this.oids.firmware_rev);
-        if (!val) {
-            return "Unknown"
-        }
-        this.firmwareRev = val;
-        this.log.info("Firmware Rev.: " + this.firmwareRev);
-        return this.firmwareRev;
+        return this.cachedInformations[oid];
     }
 }
